@@ -2,6 +2,7 @@
 
 #include <SDL.h>
 #include <cstdint>
+
 using std::uint32_t;
 using std::uint8_t;
 

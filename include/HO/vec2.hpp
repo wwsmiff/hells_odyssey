@@ -1,7 +1,9 @@
 #pragma once
 
+#include <cmath>
 #include <cstdint>
 #include <ostream>
+
 using std::uint32_t;
 
 namespace HO
@@ -9,6 +11,32 @@ namespace HO
 template <typename T> struct Vec2
 {
   T x{}, y{};
+
+  void normalize()
+  {
+    float magnitude{static_cast<float>(
+        std::sqrt((this->x * this->x) + (this->y * this->y)))};
+    if (magnitude != 0)
+    {
+      this->x /= magnitude;
+      this->y /= magnitude;
+    }
+  }
+
+  Vec2<float> normalized() const
+  {
+    float magnitude{static_cast<float>(
+        std::sqrt((this->x * this->x) + (this->y * this->y)))};
+    if (magnitude)
+      return Vec2<float>{(this->x / magnitude), (this->y / magnitude)};
+    return Vec2<float>{0};
+  }
+
+  float magnitude() const
+  {
+    return static_cast<float>(
+        std::sqrt((this->x * this->x) + (this->y * this->y)));
+  }
 
   void operator+=(const Vec2<T> &other)
   {
@@ -109,6 +137,7 @@ template <typename T> bool operator!=(const Vec2<T> &vec2, const T &scalar)
 {
   return vec2.x != scalar || vec2.y != scalar;
 }
+
 }; // namespace HO
 
 template <typename T>

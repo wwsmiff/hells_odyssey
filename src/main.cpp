@@ -1,7 +1,7 @@
 #include <HO/HO.hpp>
 #include <SDL.h>
-#include <cmath>
 #include <cstdint>
+#include <filesystem>
 
 int main(int argc, char *argv[])
 {
@@ -23,9 +23,6 @@ int main(int argc, char *argv[])
   constexpr uint32_t fps_lock_v{60};
   constexpr uint32_t desired_fps_v{static_cast<uint32_t>(1000 / fps_lock_v)};
 
-  HO::Vec2<uint32_t> gameBoundsHorizontal{};
-  HO::Vec2<uint32_t> gameBoundsVertical{};
-
   HO::Window mainWindow{"Hell's Odyssey",
                         HO::Vec2<int32_t>{primaryDisplay.w, primaryDisplay.h},
                         SDL_WINDOW_FULLSCREEN};
@@ -37,10 +34,12 @@ int main(int argc, char *argv[])
   gameBackground.x =
       static_cast<int32_t>((primaryDisplay.w / 2) - (gameBackground.w / 2));
 
-  gameBoundsHorizontal.x = gameBackground.x;
-  gameBoundsHorizontal.y = gameBackground.x + gameBackground.w;
-  gameBoundsVertical.x = gameBackground.y;
-  gameBoundsVertical.y = gameBackground.y + gameBackground.h;
+  HO::Vec2<uint32_t> gameBoundsHorizontal{
+      static_cast<uint32_t>(gameBackground.x),
+      static_cast<uint32_t>(gameBackground.x + gameBackground.w)};
+  HO::Vec2<uint32_t> gameBoundsVertical{
+      static_cast<uint32_t>(gameBackground.y),
+      static_cast<uint32_t>(gameBackground.y + gameBackground.h)};
 
   auto fromLeft = [=](int n) { return gameBoundsHorizontal.x + n; };
   auto fromRight = [=](int n) { return gameBoundsHorizontal.y - n; };
@@ -48,8 +47,6 @@ int main(int argc, char *argv[])
   auto fromBottom = [=](int n) { return gameBoundsVertical.y - n; };
 
   constexpr float player_velocity_v{6.0f};
-  const float player_velocity_normalized_v{static_cast<float>(std::sqrt(
-      std::pow(player_velocity_v, 2) + std::pow(player_velocity_v, 2)))};
 
   HO::Entity player{HO::Vec2<uint32_t>{0, 0},
                     HO::Vec2<uint32_t>{blocksize, blocksize}};
@@ -61,10 +58,11 @@ int main(int argc, char *argv[])
   bool playerLeft{false}, playerRight{false}, playerUp{false},
       playerDown{false};
 
+  std::cout << std::filesystem::current_path() << std::endl;
+
   player.loadTexture(mainWindow.getRenderer(),
                      "../assets/sprites/player_ship.png");
-
-  HO::Vec2<uint32_t> playerDirection;
+  HO::Vec2<int32_t> playerDirection{};
 
   auto start{SDL_GetTicks()};
   int32_t framesDrawn{0};
@@ -88,16 +86,24 @@ int main(int argc, char *argv[])
         switch (windowEvent.key.keysym.sym)
         {
         case SDLK_d:
+          playerLeft = false;
           playerRight = true;
+          playerDirection.x = 1;
           break;
         case SDLK_a:
+          playerRight = false;
           playerLeft = true;
+          playerDirection.x = -1;
           break;
         case SDLK_w:
+          playerDown = false;
           playerUp = true;
+          playerDirection.y = -1;
           break;
         case SDLK_s:
+          playerUp = false;
           playerDown = true;
+          playerDirection.y = 1;
           break;
         }
       }
@@ -108,15 +114,19 @@ int main(int argc, char *argv[])
         {
         case SDLK_d:
           playerRight = false;
+          playerDirection.x = 0;
           break;
         case SDLK_a:
           playerLeft = false;
+          playerDirection.x = 0;
           break;
         case SDLK_w:
           playerUp = false;
+          playerDirection.y = 0;
           break;
         case SDLK_s:
           playerDown = false;
+          playerDirection.y = 0;
           break;
         }
       }
@@ -132,18 +142,19 @@ int main(int argc, char *argv[])
             {
               playerRight = false;
               playerLeft = true;
+              playerDirection.x = -1;
             }
             else if (windowEvent.jaxis.value > joystick_deadzone_v)
             {
               playerLeft = false;
               playerRight = true;
+              playerDirection.x = 1;
             }
-
-            /* Delete this crap later */
             else
             {
               playerLeft = false;
               playerRight = false;
+              playerDirection.x = 0;
             }
           }
 
@@ -153,51 +164,60 @@ int main(int argc, char *argv[])
             {
               playerDown = false;
               playerUp = true;
+              playerDirection.y = -1;
             }
             else if (windowEvent.jaxis.value > joystick_deadzone_v)
             {
               playerUp = false;
               playerDown = true;
+              playerDirection.y = 1;
             }
-
-            /* Delete this crap later */
             else
             {
-              playerDown = false;
               playerUp = false;
+              playerDown = false;
+              playerDirection.y = 0;
             }
           }
         }
       }
     }
 
+    HO::Vec2<float> playerDirectionNormalized = playerDirection.normalized();
+
+    std::cout << player.getPosition() << std::endl;
+
+    if (playerLeft)
+    {
+      if ((player.getPosition().x - padding_v) > gameBoundsHorizontal.x)
+        player.move(
+            HO::Vec2<int32_t>{static_cast<int32_t>(playerDirectionNormalized.x *
+                                                   player_velocity_v),
+                              0});
+    }
     if (playerRight)
     {
       if ((player.getPosition().x + player.getSize().x + padding_v) <
           gameBoundsHorizontal.y)
         player.move(
-            HO::Vec2<int32_t>{static_cast<int32_t>(player_velocity_v), 0});
+            HO::Vec2<int32_t>{static_cast<int32_t>(playerDirectionNormalized.x *
+                                                   player_velocity_v),
+                              0});
     }
-    if (playerLeft)
-    {
-      if (player.getPosition().x > gameBoundsHorizontal.x + padding_v)
-        player.move(
-            HO::Vec2<int32_t>{static_cast<int32_t>(-player_velocity_v), 0});
-    }
-
     if (playerUp)
     {
-      if (player.getPosition().y > gameBoundsVertical.x + padding_v)
-        player.move(
-            HO::Vec2<int32_t>{0, static_cast<int32_t>(-player_velocity_v)});
+      if (player.getPosition().y > (gameBoundsVertical.x + padding_v))
+        player.move(HO::Vec2<int32_t>{
+            0, static_cast<int32_t>(playerDirectionNormalized.y *
+                                    player_velocity_v)});
     }
-
     if (playerDown)
     {
       if ((player.getPosition().y + player.getSize().y + padding_v) <
           gameBoundsVertical.y)
-        player.move(
-            HO::Vec2<int32_t>{0, static_cast<int32_t>(player_velocity_v)});
+        player.move(HO::Vec2<int32_t>{
+            0, static_cast<int32_t>(playerDirectionNormalized.y *
+                                    player_velocity_v)});
     }
 
     mainWindow.clear(HO::Rgba{0x00'00'00'ff});
