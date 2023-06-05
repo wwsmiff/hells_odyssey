@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <gvdi/gvdi.hpp>
 
-constexpr bool enable_settings_v = false;
+constexpr bool enable_settings_v = true;
 
 int main(int argc, char *argv[])
 {
@@ -13,8 +13,7 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  if constexpr (enable_settings_v)
-    gvdi::Instance instance{{500, 600}, "Tweaks"};
+  gvdi::Instance instance{{500, 600}, "Tweaks"};
 
   SDL_DisplayMode primaryDisplay{};
   SDL_GetDesktopDisplayMode(0, &primaryDisplay);
