@@ -6,6 +6,7 @@
 #include <SDL.h>
 #include <cstdint>
 
+using std::int32_t;
 using std::uint32_t;
 
 namespace HO

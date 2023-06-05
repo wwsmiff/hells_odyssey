@@ -1,6 +1,5 @@
 #include "HO/entity.hpp"
-
-#define HO_DEBUG 1
+#include "HO/config.hpp"
 
 namespace HO
 {
@@ -23,14 +22,18 @@ void Entity::setColor(const HO::Rgba &color) { this->mColor = color; }
 
 void Entity::render(SDL_Renderer *renderer)
 {
-#if HO_DEBUG
-  SDL_SetRenderDrawColor(renderer, mColor.r, mColor.g, mColor.b, mColor.a);
-  SDL_RenderDrawRect(renderer, &(this->mRenderRect));
-  SDL_SetRenderDrawColor(renderer, 255, 68, 78, 255);
-  SDL_RenderDrawRect(renderer, &(this->mHitbox));
-#else
-  SDL_RenderCopy(renderer, this->mTexture.get(), nullptr, &(this->mRenderRect));
-#endif
+  if (Config::debugView)
+  {
+    SDL_SetRenderDrawColor(renderer, mColor.r, mColor.g, mColor.b, mColor.a);
+    SDL_RenderDrawRect(renderer, &(this->mRenderRect));
+    SDL_SetRenderDrawColor(renderer, 255, 68, 78, 255);
+    SDL_RenderDrawRect(renderer, &(this->mHitbox));
+  }
+  else
+  {
+    SDL_RenderCopy(renderer, this->mTexture.get(), nullptr,
+                   &(this->mRenderRect));
+  }
 }
 
 void Entity::move(const Vec2<int32_t> &offset)
