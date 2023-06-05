@@ -1,7 +1,9 @@
 #include <HO/HO.hpp>
 #include <SDL.h>
 #include <cstdint>
-#include <filesystem>
+#include <gvdi/gvdi.hpp>
+
+constexpr bool enable_settings_v = true;
 
 int main(int argc, char *argv[])
 {
@@ -11,13 +13,14 @@ int main(int argc, char *argv[])
     return 1;
   }
 
+  gvdi::Instance instance{{500, 600}, "Tweaks"};
+
   SDL_DisplayMode primaryDisplay{};
   SDL_GetDesktopDisplayMode(0, &primaryDisplay);
 
   constexpr int32_t joystick_deadzone_v{8000};
   constexpr uint32_t padding_v{16};
   constexpr int32_t camera_width_v{800};
-  constexpr uint32_t blocksize{128};
   const int32_t camera_height_v{primaryDisplay.h};
 
   constexpr uint32_t fps_lock_v{60};
@@ -25,7 +28,7 @@ int main(int argc, char *argv[])
 
   HO::Window mainWindow{"Hell's Odyssey",
                         HO::Vec2<int32_t>{primaryDisplay.w, primaryDisplay.h},
-                        SDL_WINDOW_FULLSCREEN};
+                        SDL_WINDOW_FULLSCREEN_DESKTOP};
   bool running{true};
 
   SDL_Rect gameBackground{0, 0, camera_width_v, 0};
@@ -46,19 +49,15 @@ int main(int argc, char *argv[])
   auto fromTop = [=](int n) { return gameBoundsVertical.x + n; };
   auto fromBottom = [=](int n) { return gameBoundsVertical.y - n; };
 
-  constexpr float player_velocity_v{6.0f};
-
   HO::Entity player{HO::Vec2<uint32_t>{0, 0},
-                    HO::Vec2<uint32_t>{blocksize, blocksize}};
-  player.setPosition(
-      HO::Vec2<uint32_t>{fromLeft(50), fromBottom(blocksize + 50)});
+                    HO::Vec2<uint32_t>{HO::Config::playerBlocksize,
+                                       HO::Config::playerBlocksize}};
+  player.setPosition(HO::Vec2<uint32_t>{
+      fromLeft(50), fromBottom(HO::Config::playerBlocksize + 50)});
   player.setColor(HO::Rgba{0x2c'ee'2c'ff});
-  player.setHitbox(HO::Vec2<uint32_t>{20, 20});
 
   bool playerLeft{false}, playerRight{false}, playerUp{false},
       playerDown{false};
-
-  std::cout << std::filesystem::current_path() << std::endl;
 
   player.loadTexture(mainWindow.getRenderer(),
                      "../assets/sprites/player_ship.png");
@@ -76,6 +75,13 @@ int main(int argc, char *argv[])
 
   while (running)
   {
+    player.setHitbox(
+        HO::Vec2<uint32_t>{HO::Config::playerHitbox, HO::Config::playerHitbox});
+    player.setSize(HO::Vec2<uint32_t>{HO::Config::playerBlocksize,
+                                      HO::Config::playerBlocksize});
+
+    gvdi::Frame frame{instance};
+
     while (SDL_PollEvent(&windowEvent))
     {
       if (windowEvent.type == SDL_QUIT)
@@ -185,14 +191,12 @@ int main(int argc, char *argv[])
 
     HO::Vec2<float> playerDirectionNormalized = playerDirection.normalized();
 
-    std::cout << player.getPosition() << std::endl;
-
     if (playerLeft)
     {
       if ((player.getPosition().x - padding_v) > gameBoundsHorizontal.x)
         player.move(
             HO::Vec2<int32_t>{static_cast<int32_t>(playerDirectionNormalized.x *
-                                                   player_velocity_v),
+                                                   HO::Config::playerVelocity),
                               0});
     }
     if (playerRight)
@@ -201,7 +205,7 @@ int main(int argc, char *argv[])
           gameBoundsHorizontal.y)
         player.move(
             HO::Vec2<int32_t>{static_cast<int32_t>(playerDirectionNormalized.x *
-                                                   player_velocity_v),
+                                                   HO::Config::playerVelocity),
                               0});
     }
     if (playerUp)
@@ -209,7 +213,7 @@ int main(int argc, char *argv[])
       if (player.getPosition().y > (gameBoundsVertical.x + padding_v))
         player.move(HO::Vec2<int32_t>{
             0, static_cast<int32_t>(playerDirectionNormalized.y *
-                                    player_velocity_v)});
+                                    HO::Config::playerVelocity)});
     }
     if (playerDown)
     {
@@ -217,7 +221,7 @@ int main(int argc, char *argv[])
           gameBoundsVertical.y)
         player.move(HO::Vec2<int32_t>{
             0, static_cast<int32_t>(playerDirectionNormalized.y *
-                                    player_velocity_v)});
+                                    HO::Config::playerVelocity)});
     }
 
     mainWindow.clear(HO::Rgba{0x00'00'00'ff});
@@ -228,6 +232,27 @@ int main(int argc, char *argv[])
     player.render(mainWindow.getRenderer());
 
     mainWindow.render();
+
+    if constexpr (enable_settings_v)
+    {
+      ImGui::SetNextWindowPos({0, 0});
+      ImGui::SetNextWindowSize({500, 600});
+      ImGui::Begin("Tools", nullptr, ImGuiWindowFlags_NoTitleBar);
+      ImGui::Checkbox("Debug View", &HO::Config::debugView);
+
+      ImGui::SliderFloat("Player velocity", &HO::Config::playerVelocity, 0.0f,
+                         50.0f);
+
+      int32_t playerBlocksizeInt{
+          static_cast<int32_t>(HO::Config::playerBlocksize)};
+      ImGui::SliderInt("Block size", &playerBlocksizeInt, 0, 1024);
+      HO::Config::playerBlocksize = static_cast<uint32_t>(playerBlocksizeInt);
+
+      int32_t playerHitboxInt{static_cast<int32_t>(HO::Config::playerHitbox)};
+      ImGui::SliderInt("Hitbox size", &playerHitboxInt, 0, 1024);
+      HO::Config::playerHitbox = static_cast<uint32_t>(playerHitboxInt);
+      ImGui::End();
+    }
 
     auto current{SDL_GetTicks()};
     auto delta{current - start};
