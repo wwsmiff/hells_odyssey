@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <gvdi/gvdi.hpp>
 
-constexpr bool enable_settings_v = true;
+constexpr bool enable_settings_v = false;
 
 int main(int argc, char *argv[])
 {
@@ -13,7 +13,8 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  gvdi::Instance instance{{500, 600}, "Tweaks"};
+  if constexpr (enable_settings_v)
+    gvdi::Instance instance{{500, 600}, "Tweaks"};
 
   SDL_DisplayMode primaryDisplay{};
   SDL_GetDesktopDisplayMode(0, &primaryDisplay);
@@ -79,9 +80,6 @@ int main(int argc, char *argv[])
         HO::Vec2<uint32_t>{HO::Config::playerHitbox, HO::Config::playerHitbox});
     player.setSize(HO::Vec2<uint32_t>{HO::Config::playerBlocksize,
                                       HO::Config::playerBlocksize});
-
-    gvdi::Frame frame{instance};
-
     while (SDL_PollEvent(&windowEvent))
     {
       if (windowEvent.type == SDL_QUIT)
@@ -235,6 +233,7 @@ int main(int argc, char *argv[])
 
     if constexpr (enable_settings_v)
     {
+      gvdi::Frame frame{instance};
       ImGui::SetNextWindowPos({0, 0});
       ImGui::SetNextWindowSize({500, 600});
       ImGui::Begin("Tools", nullptr, ImGuiWindowFlags_NoTitleBar);
