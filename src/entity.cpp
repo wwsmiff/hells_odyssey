@@ -3,13 +3,7 @@
 
 namespace HO
 {
-Entity::Entity()
-    : mTexture{}, mPosition{0, 0}, mSize{0, 0}, mHitbox{0, 0, 0, 0},
-      mRenderRect{0, 0, 0, 0}, mColor{0}
-{
-}
-
-Entity::Entity(const Vec2<uint32_t> &position, const Vec2<uint32_t> &size)
+Entity::Entity(const Vec2<float> &position, const Vec2<float> &size)
     : mTexture{}, mPosition{position}, mSize{size}, mHitbox{0, 0, 0, 0},
       mRenderRect{static_cast<int32_t>(position.x),
                   static_cast<int32_t>(position.y),
@@ -36,46 +30,52 @@ void Entity::render(SDL_Renderer *renderer)
   }
 }
 
-void Entity::move(const Vec2<int32_t> &offset)
+void Entity::move(const Vec2<float> &offset)
 {
   this->mPosition.x += offset.x;
   this->mPosition.y += offset.y;
-  this->mRenderRect.x = this->mPosition.x;
-  this->mRenderRect.y = this->mPosition.y;
+  this->mRenderRect.x = static_cast<int32_t>(this->mPosition.x);
+  this->mRenderRect.y = static_cast<int32_t>(this->mPosition.y);
   this->mHitbox.x =
-      (this->mRenderRect.x + (this->mRenderRect.w / 2)) - (this->mHitbox.w / 2);
+      static_cast<int32_t>((this->mRenderRect.x + (this->mRenderRect.w / 2)) -
+                           (this->mHitbox.w / 2));
   this->mHitbox.y =
-      (this->mRenderRect.y + (this->mRenderRect.h / 2)) - (this->mHitbox.h / 2);
+      static_cast<int32_t>((this->mRenderRect.y + (this->mRenderRect.h / 2)) -
+                           (this->mHitbox.h / 2));
 }
-void Entity::setPosition(const Vec2<uint32_t> &position)
+void Entity::setPosition(const Vec2<float> &position)
 {
   this->mPosition = position;
-  this->mRenderRect.x = this->mPosition.x;
-  this->mRenderRect.y = this->mPosition.y;
+  this->mRenderRect.x = static_cast<int32_t>(this->mPosition.x);
+  this->mRenderRect.y = static_cast<int32_t>(this->mPosition.y);
   this->mHitbox.x =
-      (this->mRenderRect.x + (this->mRenderRect.w / 2)) - (this->mHitbox.w / 2);
+      static_cast<int32_t>((this->mRenderRect.x + (this->mRenderRect.w / 2)) -
+                           (this->mHitbox.w / 2));
   this->mHitbox.y =
-      (this->mRenderRect.y + (this->mRenderRect.h / 2)) - (this->mHitbox.h / 2);
+      static_cast<int32_t>((this->mRenderRect.y + (this->mRenderRect.h / 2)) -
+                           (this->mHitbox.h / 2));
 }
-void Entity::setSize(const Vec2<uint32_t> &size)
+void Entity::setSize(const Vec2<float> &size)
 {
   this->mSize = size;
-  this->mRenderRect.w = this->mSize.x;
-  this->mRenderRect.h = this->mSize.y;
+  this->mRenderRect.w = static_cast<int32_t>(this->mSize.x);
+  this->mRenderRect.h = static_cast<int32_t>(this->mSize.y);
   this->mHitbox.x =
-      (this->mRenderRect.x + (this->mRenderRect.w / 2)) - (this->mHitbox.w / 2);
+      static_cast<int32_t>((this->mRenderRect.x + (this->mRenderRect.w / 2)) -
+                           (this->mHitbox.w / 2));
   this->mHitbox.y =
-      (this->mRenderRect.y + (this->mRenderRect.h / 2)) - (this->mHitbox.h / 2);
+      static_cast<int32_t>((this->mRenderRect.y + (this->mRenderRect.h / 2)) -
+                           (this->mHitbox.h / 2));
 }
 
-void Entity::setHitbox(const Vec2<uint32_t> &size)
+void Entity::setHitbox(const Vec2<float> &size)
 {
-  this->mHitbox.w = size.x;
-  this->mHitbox.h = size.y;
-  this->mHitbox.x =
-      (this->mRenderRect.x + (this->mRenderRect.w / 2)) - (size.x / 2);
-  this->mHitbox.y =
-      (this->mRenderRect.y + (this->mRenderRect.h / 2)) - (size.y / 2);
+  this->mHitbox.w = static_cast<int32_t>(size.x);
+  this->mHitbox.h = static_cast<int32_t>(size.y);
+  this->mHitbox.x = static_cast<int32_t>(
+      (this->mRenderRect.x + (this->mRenderRect.w / 2)) - (size.x / 2));
+  this->mHitbox.y = static_cast<int32_t>(
+      (this->mRenderRect.y + (this->mRenderRect.h / 2)) - (size.y / 2));
 }
 
 void Entity::loadTexture(SDL_Renderer *renderer, const std::string &path)
@@ -83,7 +83,7 @@ void Entity::loadTexture(SDL_Renderer *renderer, const std::string &path)
   this->mTexture.load(renderer, path);
 }
 
-Vec2<uint32_t> Entity::getPosition() const { return this->mPosition; }
-Vec2<uint32_t> Entity::getSize() const { return this->mSize; }
+Vec2<float> Entity::getPosition() const { return this->mPosition; }
+Vec2<float> Entity::getSize() const { return this->mSize; }
 
 }; // namespace HO

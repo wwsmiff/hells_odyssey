@@ -1,6 +1,6 @@
 #pragma once
 #include "config.hpp"
-#include "entity.hpp"
+#include "player.hpp"
 #include "rgba.hpp"
 #include "texture.hpp"
 #include "vec2.hpp"
