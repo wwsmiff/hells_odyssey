@@ -40,19 +40,15 @@ void Player::handleEvents(SDL_Event &event)
     {
     case SDLK_d:
       this->mPlayerRight = false;
-      // this->mPlayerDirection.x = 0;
       break;
     case SDLK_a:
       this->mPlayerLeft = false;
-      // this->mPlayerDirection.x = 0;
       break;
     case SDLK_w:
       this->mPlayerUp = false;
-      // this->mPlayerDirection.y = 0;
       break;
     case SDLK_s:
       this->mPlayerDown = false;
-      // this->mPlayerDirection.y = 0;
       break;
     }
   }
