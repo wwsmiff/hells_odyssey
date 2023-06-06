@@ -11,10 +11,6 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  gvdi::Instance instance{};
-  if constexpr (enable_debug_v)
-    instance = gvdi::Instance{{500, 600}, "Tweaks"};
-
   SDL_DisplayMode primaryDisplay{};
   SDL_GetDesktopDisplayMode(0, &primaryDisplay);
 
@@ -68,11 +64,14 @@ int main(int argc, char *argv[])
 
   player.loadTexture(mainWindow.getRenderer(),
                      "../assets/sprites/player_ship.png");
-  HO::Vec2<int32_t> playerDirection{};
 
   auto start{SDL_GetTicks()};
   int32_t framesDrawn{0};
   int32_t frameCounter{0};
+
+  gvdi::Instance instance{};
+  if constexpr (enable_debug_v)
+    instance = gvdi::Instance{{500, 600}, "Tweaks"};
 
   SDL_Event windowEvent{};
 

@@ -20,8 +20,8 @@ public:
 
 protected:
   bool mPlayerUp, mPlayerDown, mPlayerLeft, mPlayerRight;
-  HO::Vec2<uint32_t> mHorizontalBounds;
-  HO::Vec2<uint32_t> mVerticalBounds;
-  HO::Vec2<int32_t> mPlayerDirection;
+  Vec2<uint32_t> mHorizontalBounds;
+  Vec2<uint32_t> mVerticalBounds;
+  Vec2<float> mPlayerDirection;
 };
 }; // namespace HO

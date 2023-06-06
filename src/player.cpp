@@ -47,10 +47,19 @@ void Player::handleEvents(SDL_Event &event)
     case SDLK_w:
       this->mPlayerUp = false;
       break;
+      break;
     case SDLK_s:
       this->mPlayerDown = false;
       break;
+    default:
+      this->mPlayerDirection = {0, 0};
+      break;
     }
+
+    if (event.key.keysym.sym == SDLK_a && event.key.keysym.sym == SDLK_d)
+      this->mPlayerDirection.x = 0;
+    if (event.key.keysym.sym == SDLK_w && event.key.keysym.sym == SDLK_s)
+      this->mPlayerDirection.y = 0;
   }
 
   /* Joystick support */
@@ -107,36 +116,33 @@ void Player::handleEvents(SDL_Event &event)
 
 void Player::update(float delta)
 {
-  HO::Vec2<float> playerDirectionNormalized =
-      this->mPlayerDirection.normalized();
+  this->mPlayerDirection.normalize();
 
   if (this->mPlayerLeft)
   {
     if ((this->mPosition.x - Config::padding_v) > this->mHorizontalBounds.x)
       this->move(HO::Vec2<float>{
-          (delta * playerDirectionNormalized.x * HO::Config::playerVelocity),
-          0});
+          (delta * this->mPlayerDirection.x * HO::Config::playerVelocity), 0});
   }
   if (this->mPlayerRight)
   {
     if ((this->mPosition.x + this->mSize.x + Config::padding_v) <
         this->mHorizontalBounds.y)
       this->move(Vec2<float>{
-          (delta * playerDirectionNormalized.x * HO::Config::playerVelocity),
-          0});
+          (delta * this->mPlayerDirection.x * HO::Config::playerVelocity), 0});
   }
   if (this->mPlayerUp)
   {
     if (this->mPosition.y > (this->mVerticalBounds.x + Config::padding_v))
-      this->move(Vec2<float>{0, (delta * playerDirectionNormalized.y *
-                                 HO::Config::playerVelocity)});
+      this->move(Vec2<float>{
+          0, (delta * this->mPlayerDirection.y * HO::Config::playerVelocity)});
   }
   if (this->mPlayerDown)
   {
     if ((this->mPosition.y + this->mSize.y + Config::padding_v) <
         this->mVerticalBounds.y)
-      this->move(Vec2<float>{0, (delta * playerDirectionNormalized.y *
-                                 HO::Config::playerVelocity)});
+      this->move(Vec2<float>{
+          0, (delta * this->mPlayerDirection.y * HO::Config::playerVelocity)});
   }
 }
 
