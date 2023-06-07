@@ -1,15 +1,33 @@
 #include "HO/input_manager.hpp"
+#include "HO/config.hpp"
 #include <SDL.h>
+#include <iostream>
 
 namespace HO
 {
-  void InputManager::beginNewFrame()
+void InputManager::beginNewFrame()
+{
+  this->mPressedKeys.clear();
+  this->mReleasedKeys.clear();
+
+  SDL_GetMouseState(&(this->mousePosition.x), &(this->mousePosition.y));
+
+  this->mJoysticksConnected = 0;
+  if (!this->mPrimaryJoystick)
   {
-    this->mPressedKeys.clear();
-    this->mReleasedKeys.clear();
+    SDL_JoystickEventState(SDL_DISABLE);
+    this->mPrimaryJoystick =
+        std::unique_ptr<SDL_Joystick, Deleters::SdlDeleter>{
+            SDL_JoystickOpen(mJoysticksConnected)};
+  }
+  else if (this->mPrimaryJoystick)
+  {
+    SDL_JoystickEventState(SDL_ENABLE);
+    this->mJoysticksConnected++;
+  }
 
-    SDL_PollEvent(&(this->mEvent));
-
+  if (SDL_PollEvent(&(this->mEvent)))
+  {
     if (this->mEvent.type == SDL_KEYDOWN)
     {
       this->mPressedKeys[this->mEvent.key.keysym.sym] = true;
@@ -20,21 +38,114 @@ namespace HO
       this->mReleasedKeys[this->mEvent.key.keysym.sym] = true;
       this->mHeldKeys[this->mEvent.key.keysym.sym] = false;
     }
-  }
 
-  bool InputManager::wasKeyPressed(SDL_Keycode key)
-  {
-    return this->mPressedKeys[key];
-  }
-  bool InputManager::wasKeyReleased(SDL_Keycode key)
-  {
-    return this->mReleasedKeys[key];
-  }
-  bool InputManager::isKeyHeld(SDL_Keycode key) { return this->mHeldKeys[key]; }
+    if (this->mPrimaryJoystick)
+    {
+      if (this->mEvent.type == SDL_JOYAXISMOTION)
+      {
+        if (this->mEvent.jaxis.which == 0) /* First Joystick */
+        {
+          if (this->mEvent.jaxis.axis == 0) /* Horizontal axis */
+          {
+            if (this->mEvent.jaxis.value < -HO::Config::joystick_deadzone_v)
+            {
+              this->mJoystickAxis[JOYSTICK_RIGHT] = false;
+              this->mJoystickAxis[JOYSTICK_LEFT] = true;
+            }
+            else if (this->mEvent.jaxis.value > HO::Config::joystick_deadzone_v)
+            {
+              this->mJoystickAxis[JOYSTICK_LEFT] = false;
+              this->mJoystickAxis[JOYSTICK_RIGHT] = true;
+            }
+            else
+            {
+              this->mJoystickAxis[JOYSTICK_RIGHT] = false;
+              this->mJoystickAxis[JOYSTICK_LEFT] = false;
+            }
+          }
 
-  bool InputManager::eventOccurred(SDL_EventType type)
-  {
-    return (this->mEvent.type == type);
+          else if (this->mEvent.jaxis.axis == 1) /* Vertical axis */
+          {
+            if (this->mEvent.jaxis.value < -HO::Config::joystick_deadzone_v)
+            {
+              this->mJoystickAxis[JOYSTICK_DOWN] = false;
+              this->mJoystickAxis[JOYSTICK_UP] = true;
+            }
+            else if (this->mEvent.jaxis.value > HO::Config::joystick_deadzone_v)
+            {
+              this->mJoystickAxis[JOYSTICK_UP] = false;
+              this->mJoystickAxis[JOYSTICK_DOWN] = true;
+            }
+            else
+            {
+              this->mJoystickAxis[JOYSTICK_UP] = false;
+              this->mJoystickAxis[JOYSTICK_DOWN] = false;
+            }
+          }
+        }
+      }
+    }
   }
+}
+
+bool InputManager::wasKeyPressed(SDL_Keycode key) const
+{
+  if (this->mPressedKeys.find(key) == this->mPressedKeys.end())
+  {
+    return false;
+  }
+  return this->mPressedKeys.at(key);
+}
+bool InputManager::wasKeyReleased(SDL_Keycode key) const
+{
+  if (this->mReleasedKeys.find(key) == this->mReleasedKeys.end())
+  {
+    return false;
+  }
+  return this->mReleasedKeys.at(key);
+}
+bool InputManager::isKeyHeld(SDL_Keycode key) const
+{
+  if (this->mHeldKeys.find(key) == this->mHeldKeys.end())
+  {
+    return false;
+  }
+  return this->mHeldKeys.at(key);
+}
+
+bool InputManager::eventOccurred(SDL_EventType type) const
+{
+  return (this->mEvent.type == type);
+}
+
+bool InputManager::joystickAxisRight() const
+{
+  return this->mJoystickAxis.at(JOYSTICK_RIGHT);
+}
+bool InputManager::joystickAxisLeft() const
+{
+  return this->mJoystickAxis.at(JOYSTICK_LEFT);
+}
+bool InputManager::joystickAxisUp() const
+{
+  return this->mJoystickAxis.at(JOYSTICK_UP);
+}
+bool InputManager::joystickAxisDown() const
+{
+  return this->mJoystickAxis.at(JOYSTICK_DOWN);
+}
+
+bool InputManager::joystickAxisNone() const
+{
+  return (!this->mJoystickAxis.at(JOYSTICK_DOWN) &&
+          !this->mJoystickAxis.at(JOYSTICK_UP) &&
+          !this->mJoystickAxis.at(JOYSTICK_LEFT) &&
+          !this->mJoystickAxis.at(JOYSTICK_RIGHT));
+}
+
+uint32_t InputManager::joysticksConnected() const
+{
+  return this->mJoysticksConnected;
+}
 
 }; // namespace HO

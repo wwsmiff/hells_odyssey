@@ -48,4 +48,5 @@ target_sources(${PROJECT_NAME} PRIVATE
  src/texture.cpp
  src/deleters.cpp
  src/player.cpp
+ src/input_manager.cpp
 )

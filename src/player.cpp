@@ -1,114 +1,96 @@
 #include "HO/player.hpp"
 #include "HO/config.hpp"
+#include "HO/input_manager.hpp"
 #include <SDL.h>
 #include <iostream>
 
 namespace HO
 {
-void Player::handleEvents(SDL_Event &event)
+void Player::handleEvents(const InputManager &inputManager)
 {
-  if (event.type == SDL_KEYDOWN)
+  if (inputManager.wasKeyPressed(SDLK_d))
   {
-    switch (event.key.keysym.sym)
-    {
-    case SDLK_d:
-      this->mPlayerLeft = false;
-      this->mPlayerRight = true;
-      this->mPlayerDirection.x = 1;
-      break;
-    case SDLK_a:
-      this->mPlayerRight = false;
-      this->mPlayerLeft = true;
-      this->mPlayerDirection.x = -1;
-      break;
-    case SDLK_w:
-      this->mPlayerDown = false;
-      this->mPlayerUp = true;
-      this->mPlayerDirection.y = -1;
-      break;
-    case SDLK_s:
-      this->mPlayerUp = false;
-      this->mPlayerDown = true;
-      this->mPlayerDirection.y = 1;
-      break;
-    }
+    this->mPlayerLeft = false;
+    this->mPlayerRight = true;
+    this->mPlayerDirection.x = 1;
+  }
+  if (inputManager.wasKeyPressed(SDLK_a))
+  {
+    this->mPlayerRight = false;
+    this->mPlayerLeft = true;
+    this->mPlayerDirection.x = -1;
+  }
+  if (inputManager.wasKeyPressed(SDLK_w))
+  {
+    this->mPlayerDown = false;
+    this->mPlayerUp = true;
+    this->mPlayerDirection.y = -1;
+  }
+  if (inputManager.wasKeyPressed(SDLK_s))
+  {
+    this->mPlayerUp = false;
+    this->mPlayerDown = true;
+    this->mPlayerDirection.y = 1;
   }
 
-  if (event.type == SDL_KEYUP)
-  {
-    switch (event.key.keysym.sym)
-    {
-    case SDLK_d:
-      this->mPlayerRight = false;
-      break;
-    case SDLK_a:
-      this->mPlayerLeft = false;
-      break;
-    case SDLK_w:
-      this->mPlayerUp = false;
-      break;
-      break;
-    case SDLK_s:
-      this->mPlayerDown = false;
-      break;
-    default:
-      this->mPlayerDirection = {0, 0};
-      break;
-    }
+  if (inputManager.wasKeyReleased(SDLK_d))
+    this->mPlayerRight = false;
+  if (inputManager.wasKeyReleased(SDLK_a))
+    this->mPlayerLeft = false;
 
-    if (event.key.keysym.sym == SDLK_a && event.key.keysym.sym == SDLK_d)
-      this->mPlayerDirection.x = 0;
-    if (event.key.keysym.sym == SDLK_w && event.key.keysym.sym == SDLK_s)
-      this->mPlayerDirection.y = 0;
-  }
+  if (inputManager.wasKeyReleased(SDLK_w))
+    this->mPlayerUp = false;
+  if (inputManager.wasKeyReleased(SDLK_s))
+    this->mPlayerDown = false;
+
+  if (inputManager.wasKeyReleased(SDLK_a) &&
+      inputManager.wasKeyReleased(SDLK_d))
+    this->mPlayerDirection.x = 0;
+  if (inputManager.wasKeyReleased(SDLK_w) &&
+      inputManager.wasKeyReleased(SDLK_s))
+    this->mPlayerDirection.y = 0;
 
   /* Joystick support */
-  if (event.type == SDL_JOYAXISMOTION)
+  if (inputManager.joysticksConnected() > 0)
   {
-    if (event.jaxis.which == 0)
+    if (inputManager.eventOccurred(SDL_JOYAXISMOTION))
     {
-      if (event.jaxis.axis == 0)
+      if (inputManager.joystickAxisUp())
       {
-        if (event.jaxis.value < -HO::Config::joystick_deadzone_v)
-        {
-          this->mPlayerRight = false;
-          this->mPlayerLeft = true;
-          this->mPlayerDirection.x = -1;
-        }
-        else if (event.jaxis.value > HO::Config::joystick_deadzone_v)
-        {
-          this->mPlayerLeft = false;
-          this->mPlayerRight = true;
-          this->mPlayerDirection.x = 1;
-        }
-        else
-        {
-          this->mPlayerLeft = false;
-          this->mPlayerRight = false;
-          this->mPlayerDirection.x = 0;
-        }
+        this->mPlayerDown = false;
+        this->mPlayerUp = true;
+        this->mPlayerDirection.y = -1;
+      }
+      else if (inputManager.joystickAxisDown())
+      {
+        this->mPlayerUp = false;
+        this->mPlayerDown = true;
+        this->mPlayerDirection.y = 1;
+      }
+      else
+      {
+        this->mPlayerUp = false;
+        this->mPlayerDown = false;
+        this->mPlayerDirection.y = 0;
       }
 
-      else if (event.jaxis.axis == 1)
+      if (inputManager.joystickAxisLeft())
       {
-        if (event.jaxis.value < -HO::Config::joystick_deadzone_v)
-        {
-          this->mPlayerDown = false;
-          this->mPlayerUp = true;
-          this->mPlayerDirection.y = -1;
-        }
-        else if (event.jaxis.value > HO::Config::joystick_deadzone_v)
-        {
-          this->mPlayerUp = false;
-          this->mPlayerDown = true;
-          this->mPlayerDirection.y = 1;
-        }
-        else
-        {
-          this->mPlayerUp = false;
-          this->mPlayerDown = false;
-          this->mPlayerDirection.y = 0;
-        }
+        this->mPlayerRight = false;
+        this->mPlayerLeft = true;
+        this->mPlayerDirection.x = -1;
+      }
+      else if (inputManager.joystickAxisRight())
+      {
+        this->mPlayerLeft = false;
+        this->mPlayerRight = true;
+        this->mPlayerDirection.x = 1;
+      }
+      else
+      {
+        this->mPlayerLeft = false;
+        this->mPlayerRight = false;
+        this->mPlayerDirection.x = 0;
       }
     }
   }

@@ -73,24 +73,18 @@ int main(int argc, char *argv[])
   if constexpr (enable_debug_v)
     instance = gvdi::Instance{{500, 600}, "Tweaks"};
 
-  SDL_Event windowEvent{};
-
-  SDL_Joystick *primaryJoystick{};
-  SDL_JoystickEventState(SDL_ENABLE);
-  primaryJoystick = SDL_JoystickOpen(0);
+  HO::InputManager windowInput;
 
   while (running)
   {
     auto current{SDL_GetTicks()};
     auto delta{current - start};
 
-    while (SDL_PollEvent(&windowEvent))
-    {
-      if (windowEvent.type == SDL_QUIT)
-        running = false;
+    windowInput.beginNewFrame();
+    if (windowInput.eventOccurred(SDL_QUIT))
+      running = false;
 
-      player.handleEvents(windowEvent);
-    }
+    player.handleEvents(windowInput);
 
     if constexpr (enable_debug_v)
     {
