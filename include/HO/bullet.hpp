@@ -5,12 +5,14 @@
 #include "HO/vec2.hpp"
 #include <SDL.h>
 #include <cstdint>
+#include <vector>
 
 namespace HO
 {
 enum BulletType : uint8_t
 {
-  CLASSIC
+  CLASSIC,
+  DOUBLE
 };
 
 class Bullet
@@ -29,16 +31,15 @@ public:
   void fire();
 
   Vec2<float> getSize() const;
-  Vec2<float> getPosition() const;
   Vec2<float> getOrigin() const;
 
 protected:
   uint8_t mType;
   bool mActive{};
-  Vec2<float> mPosition{}, mOrigin{};
+  Vec2<float> mOrigin{};
   Vec2<float> mSize{};
   Texture mTexture{};
-  SDL_Rect mHitbox{};
+  std::vector<SDL_Rect> mHitboxes{};
   HO::Rgba mColor{};
 };
 }; // namespace HO
