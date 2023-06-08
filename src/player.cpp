@@ -9,9 +9,8 @@ namespace HO
 {
 
 Player::Player(const Vec2<float> &position, const Vec2<float> &size)
-    : Entity(position, size)
+    : Entity(position, size), mBullets(100)
 {
-  std::cout << position << std::endl;
   for (auto &bullet : this->mBullets)
     bullet = Bullet{CLASSIC,
                     Vec2<float>{(position.x + (size.x / 2.5f)), position.y}};
@@ -64,23 +63,21 @@ void Player::handleEvents(const InputManager &inputManager)
     this->mPlayerDirection.y = 1;
   }
 
-  // if (inputManager.isKeyHeld(SDLK_SPACE))
-  // {
-  //   static std::chrono::steady_clock::time_point start =
-  //       std::chrono::steady_clock::now();
-  //   for (auto &bullet : this->mBullets)
-  //   {
-  //     std::chrono::steady_clock::time_point current =
-  //         std::chrono::steady_clock::now();
-  //     if (std::chrono::duration_cast<std::chrono::microseconds>(current -
-  //     start)
-  //             .count() > 10)
-  //     {
-  //       bullet.fire();
-  //       start = current;
-  //     }
-  //   }
-  // }
+  if (inputManager.wasKeyPressed(SDLK_SPACE))
+  {
+    for (size_t i = 0; i < this->mBullets.size(); ++i)
+    {
+      if (!this->mBullets[i].active())
+      {
+        this->mBullets[i].fire();
+        break;
+      }
+    }
+  }
+
+  if (inputManager.isKeyHeld(SDLK_SPACE))
+  {
+  }
 
   if (inputManager.wasKeyReleased(SDLK_d))
     this->mPlayerRight = false;

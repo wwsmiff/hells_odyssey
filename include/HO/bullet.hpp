@@ -20,6 +20,7 @@ public:
   Bullet(uint8_t type, const Vec2<float> &origin);
   void update(float delta);
   // void setColor(const HO::Rgba &color);
+  bool active() const;
   void active(bool state);
   void render(SDL_Renderer *renderer);
   void setOrigin(const Vec2<float> &origin);

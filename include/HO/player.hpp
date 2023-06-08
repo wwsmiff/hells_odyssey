@@ -5,7 +5,7 @@
 #include "HO/input_manager.hpp"
 #include "HO/vec2.hpp"
 #include <SDL.h>
-#include <array>
+#include <vector>
 
 namespace HO
 {
@@ -25,10 +25,10 @@ public:
   void setVerticalBounds(const Vec2<uint32_t> &vertical);
 
 protected:
+  std::vector<Bullet> mBullets;
   bool mPlayerUp{}, mPlayerDown{}, mPlayerLeft{}, mPlayerRight{};
   Vec2<uint32_t> mHorizontalBounds{};
   Vec2<uint32_t> mVerticalBounds{};
   Vec2<float> mPlayerDirection{};
-  std::array<Bullet, 100> mBullets;
 };
 }; // namespace HO

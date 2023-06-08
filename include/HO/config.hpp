@@ -18,6 +18,6 @@ inline TweakableFloat playerBlocksize{128.0f};
 inline TweakableFloat playerHitbox{20.0f};
 inline TweakableFloat playerVelocity{0.5f};
 inline TweakableFloat bulletVelocity{1.3f};
-inline TweakableFlag debugView{false};
+inline TweakableFlag debugView{true};
 }; // namespace Config
 }; // namespace HO

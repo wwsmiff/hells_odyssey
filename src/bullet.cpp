@@ -41,6 +41,7 @@ void Bullet::update(float delta)
   this->mHitbox.x = this->mPosition.x;
   this->mHitbox.y = this->mPosition.y;
 }
+bool Bullet::active() const { return this->mActive; }
 void Bullet::active(bool state) { this->mActive = state; }
 void Bullet::setOrigin(const Vec2<float> &origin) { this->mOrigin = origin; }
 void Bullet::setType(BulletType type) { this->mType = type; }
@@ -53,7 +54,6 @@ void Bullet::render(SDL_Renderer *renderer)
 {
   if (Config::debugView)
   {
-    printf("BULLET\n");
     SDL_SetRenderDrawColor(renderer, mColor.r, mColor.g, mColor.b, mColor.a);
     SDL_RenderDrawRect(renderer, &(this->mHitbox));
   }
