@@ -9,7 +9,7 @@ namespace HO
 {
 
 Player::Player(const Vec2<float> &position, const Vec2<float> &size)
-    : Entity(position, size), mBullets(100)
+    : Entity(position, size), mBullets(50)
 {
   for (auto &bullet : this->mBullets)
     bullet = Bullet{CLASSIC,
@@ -65,6 +65,7 @@ void Player::handleEvents(const InputManager &inputManager)
 
   if (inputManager.wasKeyPressed(SDLK_SPACE))
   {
+
     for (size_t i = 0; i < this->mBullets.size(); ++i)
     {
       if (!this->mBullets[i].active())
@@ -72,20 +73,20 @@ void Player::handleEvents(const InputManager &inputManager)
         this->mBullets[i].fire();
         break;
       }
+      break;
     }
   }
-
   if (inputManager.isKeyHeld(SDLK_SPACE))
   {
     static size_t i{0};
-    this->mBullets[i].fire();
+    if (!this->mBullets[i].active())
+      this->mBullets[i].fire();
     if (this->mElapsedTime > 100)
     {
       i = (i < this->mBullets.size()) ? i + 1 : 0;
       this->mElapsedTime = 0;
     }
   }
-
   if (inputManager.wasKeyReleased(SDLK_d))
     this->mPlayerRight = false;
   if (inputManager.wasKeyReleased(SDLK_a))
