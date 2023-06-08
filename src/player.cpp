@@ -7,15 +7,14 @@
 
 namespace HO
 {
-
 Player::Player(const Vec2<float> &position, const Vec2<float> &size)
     : Entity(position, size), mBullets(200)
 {
   for (auto &bullet : this->mBullets)
     bullet =
-        Bullet{CLASSIC, Vec2<float>{((this->mPosition.x + (this->mSize.x / 2)) -
-                                     (Config::bulletHitbox / 2)),
-                                    position.y}};
+        Bullet{DOUBLE, Vec2<float>{((this->mPosition.x + (this->mSize.x / 2)) -
+                                    (Config::bulletHitbox / 2)),
+                                   position.y}};
 }
 
 void Player::move(const Vec2<float> &offset)

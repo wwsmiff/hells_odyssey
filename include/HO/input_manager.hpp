@@ -36,6 +36,8 @@ public:
   bool joystickAxisDown() const;
   bool joystickAxisNone() const;
 
+  // bool joystickButtonPressed(SDL_JoyButtonEvent) const;
+
   HO::Vec2<int32_t> joystickAxis;
   HO::Vec2<int32_t> mousePosition;
 
