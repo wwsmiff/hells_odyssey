@@ -77,6 +77,13 @@ void Player::handleEvents(const InputManager &inputManager)
 
   if (inputManager.isKeyHeld(SDLK_SPACE))
   {
+    static size_t i{0};
+    this->mBullets[i].fire();
+    if (this->mElapsedTime > 100)
+    {
+      i = (i < this->mBullets.size()) ? i + 1 : 0;
+      this->mElapsedTime = 0;
+    }
   }
 
   if (inputManager.wasKeyReleased(SDLK_d))
@@ -143,6 +150,8 @@ void Player::handleEvents(const InputManager &inputManager)
 
 void Player::update(float delta)
 {
+  this->mElapsedTime += delta;
+
   this->mPlayerDirection.normalize();
 
   if (this->mPlayerLeft)

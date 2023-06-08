@@ -30,5 +30,6 @@ protected:
   Vec2<uint32_t> mHorizontalBounds{};
   Vec2<uint32_t> mVerticalBounds{};
   Vec2<float> mPlayerDirection{};
+  float mElapsedTime{};
 };
 }; // namespace HO
