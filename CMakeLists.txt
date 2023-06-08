@@ -49,4 +49,5 @@ target_sources(${PROJECT_NAME} PRIVATE
  src/deleters.cpp
  src/player.cpp
  src/input_manager.cpp
+ src/bullet.cpp
 )

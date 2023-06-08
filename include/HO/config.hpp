@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 
-constexpr inline bool enable_debug_v = false;
+constexpr inline bool enable_debug_v{false};
 
 namespace HO
 {
@@ -17,6 +17,7 @@ inline constexpr TweakableInt joystick_deadzone_v{8000};
 inline TweakableFloat playerBlocksize{128.0f};
 inline TweakableFloat playerHitbox{20.0f};
 inline TweakableFloat playerVelocity{0.5f};
+inline TweakableFloat bulletVelocity{1.3f};
 inline TweakableFlag debugView{false};
 }; // namespace Config
 }; // namespace HO

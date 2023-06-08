@@ -2,16 +2,47 @@
 #include "HO/config.hpp"
 #include "HO/input_manager.hpp"
 #include <SDL.h>
+#include <chrono>
 #include <iostream>
 
 namespace HO
 {
+
+Player::Player(const Vec2<float> &position, const Vec2<float> &size)
+    : Entity(position, size)
+{
+  std::cout << position << std::endl;
+  for (auto &bullet : this->mBullets)
+    bullet = Bullet{CLASSIC,
+                    Vec2<float>{(position.x + (size.x / 2.5f)), position.y}};
+}
+
+void Player::move(const Vec2<float> &offset)
+{
+  this->mPosition.x += offset.x;
+  this->mPosition.y += offset.y;
+  this->mRenderRect.x = static_cast<int32_t>(this->mPosition.x);
+  this->mRenderRect.y = static_cast<int32_t>(this->mPosition.y);
+  this->mHitbox.x =
+      static_cast<int32_t>((this->mRenderRect.x + (this->mRenderRect.w / 2)) -
+                           (this->mHitbox.w / 2));
+  this->mHitbox.y =
+      static_cast<int32_t>((this->mRenderRect.y + (this->mRenderRect.h / 2)) -
+                           (this->mHitbox.h / 2));
+
+  for (auto &bullet : this->mBullets)
+    bullet.setOrigin(Vec2<float>{
+        ((this->mPosition.x + (this->mSize.x / 2)) - (bullet.getSize().x / 2)),
+        this->mPosition.y});
+}
+
 void Player::handleEvents(const InputManager &inputManager)
 {
   if (inputManager.wasKeyPressed(SDLK_d))
   {
     this->mPlayerLeft = false;
     this->mPlayerRight = true;
+
     this->mPlayerDirection.x = 1;
   }
   if (inputManager.wasKeyPressed(SDLK_a))
@@ -33,6 +64,24 @@ void Player::handleEvents(const InputManager &inputManager)
     this->mPlayerDirection.y = 1;
   }
 
+  // if (inputManager.isKeyHeld(SDLK_SPACE))
+  // {
+  //   static std::chrono::steady_clock::time_point start =
+  //       std::chrono::steady_clock::now();
+  //   for (auto &bullet : this->mBullets)
+  //   {
+  //     std::chrono::steady_clock::time_point current =
+  //         std::chrono::steady_clock::now();
+  //     if (std::chrono::duration_cast<std::chrono::microseconds>(current -
+  //     start)
+  //             .count() > 10)
+  //     {
+  //       bullet.fire();
+  //       start = current;
+  //     }
+  //   }
+  // }
+
   if (inputManager.wasKeyReleased(SDLK_d))
     this->mPlayerRight = false;
   if (inputManager.wasKeyReleased(SDLK_a))
@@ -49,7 +98,6 @@ void Player::handleEvents(const InputManager &inputManager)
   if (inputManager.wasKeyReleased(SDLK_w) &&
       inputManager.wasKeyReleased(SDLK_s))
     this->mPlayerDirection.y = 0;
-
   /* Joystick support */
   if (inputManager.joysticksConnected() > 0)
   {
@@ -125,6 +173,29 @@ void Player::update(float delta)
         this->mVerticalBounds.y)
       this->move(Vec2<float>{
           0, (delta * this->mPlayerDirection.y * HO::Config::playerVelocity)});
+  }
+
+  for (auto &bullet : this->mBullets)
+    bullet.update(delta);
+}
+
+void Player::render(SDL_Renderer *renderer)
+{
+  for (auto &bullet : this->mBullets)
+    bullet.render(renderer);
+
+  if (Config::debugView)
+  {
+    SDL_SetRenderDrawColor(renderer, this->mColor.r, this->mColor.g,
+                           this->mColor.b, this->mColor.a);
+    SDL_RenderDrawRect(renderer, &(this->mRenderRect));
+    SDL_SetRenderDrawColor(renderer, 255, 68, 78, 255);
+    SDL_RenderDrawRect(renderer, &(this->mHitbox));
+  }
+  else
+  {
+    SDL_RenderCopy(renderer, this->mTexture.get(), nullptr,
+                   &(this->mRenderRect));
   }
 }
 

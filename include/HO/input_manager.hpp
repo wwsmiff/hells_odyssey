@@ -7,8 +7,8 @@
 #include <array>
 #include <cstdint>
 #include <memory>
+#include <set>
 #include <string>
-#include <unordered_map>
 
 enum JoystickAxis : uint8_t
 {
@@ -42,9 +42,9 @@ public:
 protected:
   SDL_Event mEvent;
   std::unique_ptr<SDL_Joystick, Deleters::SdlDeleter> mPrimaryJoystick{};
-  std::unordered_map<SDL_Keycode, bool> mHeldKeys{};
-  std::unordered_map<SDL_Keycode, bool> mPressedKeys{};
-  std::unordered_map<SDL_Keycode, bool> mReleasedKeys{};
+  std::set<SDL_Keycode> mHeldKeys{};
+  std::set<SDL_Keycode> mPressedKeys{};
+  std::set<SDL_Keycode> mReleasedKeys{};
   std::array<bool, 4> mJoystickAxis{};
   uint32_t mJoysticksConnected{};
 };

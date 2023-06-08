@@ -30,13 +30,14 @@ void InputManager::beginNewFrame()
   {
     if (this->mEvent.type == SDL_KEYDOWN)
     {
-      this->mPressedKeys[this->mEvent.key.keysym.sym] = true;
-      this->mHeldKeys[this->mEvent.key.keysym.sym] = true;
+      this->mPressedKeys.insert(this->mEvent.key.keysym.sym);
+      this->mHeldKeys.insert(this->mEvent.key.keysym.sym);
     }
     else if (this->mEvent.type == SDL_KEYUP)
     {
-      this->mReleasedKeys[this->mEvent.key.keysym.sym] = true;
-      this->mHeldKeys[this->mEvent.key.keysym.sym] = false;
+      this->mReleasedKeys.insert(this->mEvent.key.keysym.sym);
+      auto it = this->mHeldKeys.find(this->mEvent.key.keysym.sym);
+      this->mHeldKeys.erase(this->mEvent.key.keysym.sym);
     }
 
     if (this->mPrimaryJoystick)
@@ -90,27 +91,17 @@ void InputManager::beginNewFrame()
 
 bool InputManager::wasKeyPressed(SDL_Keycode key) const
 {
-  if (this->mPressedKeys.find(key) == this->mPressedKeys.end())
-  {
-    return false;
-  }
-  return this->mPressedKeys.at(key);
+
+  return this->mPressedKeys.contains(key);
 }
 bool InputManager::wasKeyReleased(SDL_Keycode key) const
 {
-  if (this->mReleasedKeys.find(key) == this->mReleasedKeys.end())
-  {
-    return false;
-  }
-  return this->mReleasedKeys.at(key);
+
+  return this->mReleasedKeys.contains(key);
 }
 bool InputManager::isKeyHeld(SDL_Keycode key) const
 {
-  if (this->mHeldKeys.find(key) == this->mHeldKeys.end())
-  {
-    return false;
-  }
-  return this->mHeldKeys.at(key);
+  return this->mHeldKeys.contains(key);
 }
 
 bool InputManager::eventOccurred(SDL_EventType type) const

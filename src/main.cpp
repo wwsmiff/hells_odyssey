@@ -44,12 +44,13 @@ int main(int argc, char *argv[])
   auto fromTop = [=](float n) { return gameBoundsVertical.x + n; };
   auto fromBottom = [=](float n) { return gameBoundsVertical.y - n; };
 
-  HO::Player player{HO::Vec2<float>{0.0f, 0.0f},
-                    HO::Vec2<float>{HO::Config::playerBlocksize,
-                                    HO::Config::playerBlocksize}};
-  player.setPosition(HO::Vec2<float>{
-      static_cast<float>(fromLeft(50)),
-      static_cast<float>(fromBottom(HO::Config::playerBlocksize + 50))});
+  HO::Player player{
+      HO::Vec2<float>{
+          static_cast<float>(((gameBoundsHorizontal.x + (camera_width_v / 2)) -
+                              (HO::Config::playerBlocksize / 2))),
+          static_cast<float>(fromBottom(HO::Config::playerBlocksize + 50))},
+      HO::Vec2<float>{HO::Config::playerBlocksize,
+                      HO::Config::playerBlocksize}};
   player.setColor(HO::Rgba{0x2c'ee'2c'ff});
 
   player.setHitbox(
@@ -58,9 +59,6 @@ int main(int argc, char *argv[])
                                  HO::Config::playerBlocksize});
 
   player.setBounds(gameBoundsHorizontal, gameBoundsVertical);
-
-  bool playerLeft{false}, playerRight{false}, playerUp{false},
-      playerDown{false};
 
   player.loadTexture(mainWindow.getRenderer(),
                      "../assets/sprites/player_ship.png");
@@ -73,7 +71,7 @@ int main(int argc, char *argv[])
   if constexpr (enable_debug_v)
     instance = gvdi::Instance{{500, 600}, "Tweaks"};
 
-  HO::InputManager windowInput;
+  HO::InputManager windowInput{};
 
   while (running)
   {
