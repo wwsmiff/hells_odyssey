@@ -3,6 +3,7 @@
 #include "HO/bullet.hpp"
 #include "HO/entity.hpp"
 #include "HO/input_manager.hpp"
+#include "HO/particles.hpp"
 #include "HO/vec2.hpp"
 #include <SDL.h>
 #include <vector>
@@ -31,5 +32,7 @@ protected:
   Vec2<uint32_t> mVerticalBounds{};
   Vec2<float> mPlayerDirection{};
   float mElapsedTime{};
+  ParticleSystem mLeftThruster;
+  ParticleSystem mRightThruster;
 };
 }; // namespace HO

@@ -50,4 +50,6 @@ target_sources(${PROJECT_NAME} PRIVATE
  src/player.cpp
  src/input_manager.cpp
  src/bullet.cpp
+ src/random.cpp
+ src/particles.cpp
 )

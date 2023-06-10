@@ -138,6 +138,11 @@ template <typename T> bool operator!=(const Vec2<T> &vec2, const T &scalar)
   return vec2.x != scalar || vec2.y != scalar;
 }
 
+template <typename T> Vec2<T> operator-(const Vec2<T> &vec2)
+{
+  return Vec2{-vec2.x, -vec2.y};
+}
+
 }; // namespace HO
 
 template <typename T>

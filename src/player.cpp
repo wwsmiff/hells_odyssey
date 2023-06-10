@@ -1,6 +1,7 @@
 #include "HO/player.hpp"
 #include "HO/config.hpp"
 #include "HO/input_manager.hpp"
+#include "HO/rgba.hpp"
 #include <SDL.h>
 #include <chrono>
 #include <iostream>
@@ -8,7 +9,21 @@
 namespace HO
 {
 Player::Player(const Vec2<float> &position, const Vec2<float> &size)
-    : Entity(position, size), mBullets(200)
+    : Entity(position, size), mBullets(200),
+      mLeftThruster{50,
+                    Vec2<float>{(this->mPosition.x + 58),
+                                (this->mPosition.y + this->mSize.y - 32)},
+                    Vec2<float>{-1.0f, 1.0f},
+                    Vec2<float>{0.0f, 4.0f},
+                    25.0f,
+                    Rgba{200, 200, 200, 255}},
+      mRightThruster{50,
+                     Vec2<float>{(this->mPosition.x + this->mSize.x - 70),
+                                 (this->mPosition.y + this->mSize.y - 32)},
+                     Vec2<float>{-1.0f, 1.0f},
+                     Vec2<float>{0.0f, 4.0f},
+                     25.0f,
+                     Rgba{200, 200, 200, 255}}
 {
   for (auto &bullet : this->mBullets)
     bullet =
@@ -34,6 +49,12 @@ void Player::move(const Vec2<float> &offset)
     bullet.setOrigin(Vec2<float>{
         ((this->mPosition.x + (this->mSize.x / 2)) - (bullet.getSize().x / 2)),
         this->mPosition.y});
+
+  mLeftThruster.setOrigin(Vec2<float>{
+      (this->mPosition.x + 58), (this->mPosition.y + this->mSize.y - 32)});
+  mRightThruster.setOrigin(
+      Vec2<float>{(this->mPosition.x + this->mSize.x - 70),
+                  (this->mPosition.y + this->mSize.y - 32)});
 }
 
 void Player::handleEvents(const InputManager &inputManager)
@@ -187,6 +208,9 @@ void Player::update(float delta)
 
   for (auto &bullet : this->mBullets)
     bullet.update(delta);
+
+  this->mLeftThruster.update(delta);
+  this->mRightThruster.update(delta);
 }
 
 void Player::render(SDL_Renderer *renderer)
@@ -207,6 +231,9 @@ void Player::render(SDL_Renderer *renderer)
     SDL_RenderCopy(renderer, this->mTexture.get(), nullptr,
                    &(this->mRenderRect));
   }
+
+  this->mLeftThruster.render(renderer);
+  this->mRightThruster.render(renderer);
 }
 
 void Player::setBounds(const HO::Vec2<uint32_t> &horizontal,

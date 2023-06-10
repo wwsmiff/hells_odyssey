@@ -14,11 +14,11 @@ using TweakableFloat = float;
 
 inline constexpr TweakableFloat padding_v{16.0f};
 inline constexpr TweakableInt joystick_deadzone_v{8000};
-inline TweakableFloat playerBlocksize{128.0f};
+inline TweakableFloat playerBlocksize{160.0f};
 inline TweakableFloat playerHitbox{20.0f};
 inline TweakableFloat playerVelocity{0.75f};
 inline TweakableFloat bulletVelocity{1.3f};
 inline TweakableFloat bulletHitbox{15.0f};
-inline TweakableFlag debugView{true};
+inline TweakableFlag debugView{false};
 }; // namespace Config
 }; // namespace HO
