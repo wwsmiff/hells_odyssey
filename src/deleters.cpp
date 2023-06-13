@@ -17,5 +17,9 @@ void SdlDeleter::operator()(SDL_Renderer *renderer) const
 {
   SDL_DestroyRenderer(renderer);
 }
+void SdlDeleter::operator()(SDL_Joystick *joystick) const
+{
+  SDL_JoystickClose(joystick);
+}
 }; // namespace Deleters
 }; // namespace HO

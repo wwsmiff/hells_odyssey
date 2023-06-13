@@ -1,6 +1,9 @@
 #pragma once
 #include "config.hpp"
-#include "entity.hpp"
+#include "input_manager.hpp"
+#include "particles.hpp"
+#include "player.hpp"
+#include "random.hpp"
 #include "rgba.hpp"
 #include "texture.hpp"
 #include "vec2.hpp"

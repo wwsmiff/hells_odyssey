@@ -21,21 +21,13 @@ public:
   SDL_Renderer *getRenderer();
 
 protected:
-  struct WindowDeleter
-  {
-    void operator()(SDL_Window *window) const { SDL_DestroyWindow(window); }
-    void operator()(SDL_Renderer *renderer) const
-    {
-      SDL_DestroyRenderer(renderer);
-    }
-  };
   SDL_Window *createWindowOrThrow(const std::string &title, uint32_t width,
                                   uint32_t height, uint32_t flags) const;
   SDL_Renderer *createRendererOrThrow(SDL_Window *window, int32_t index,
                                       uint32_t flags) const;
-  std::unique_ptr<SDL_Window, Deleters::SdlDeleter> mWindow;
-  std::unique_ptr<SDL_Renderer, Deleters::SdlDeleter> mRenderer;
-  Vec2<int32_t> mSize;
+  std::unique_ptr<SDL_Window, Deleters::SdlDeleter> mWindow{};
+  std::unique_ptr<SDL_Renderer, Deleters::SdlDeleter> mRenderer{};
+  Vec2<int32_t> mSize{};
 };
 
 }; // namespace HO

@@ -11,6 +11,7 @@ Window::Window(const std::string &title, const HO::Vec2<int32_t> &size,
       mRenderer(
           createRendererOrThrow(mWindow.get(), -1, SDL_RENDERER_ACCELERATED))
 {
+  SDL_SetRenderDrawBlendMode(this->mRenderer.get(), SDL_BLENDMODE_BLEND);
 }
 
 Vec2<int32_t> Window::getSize()
