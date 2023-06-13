@@ -14,12 +14,8 @@ int main(int argc, char *argv[])
   SDL_DisplayMode primaryDisplay{};
   SDL_GetDesktopDisplayMode(0, &primaryDisplay);
 
-  constexpr uint32_t padding_v{16};
   constexpr int32_t camera_width_v{800};
   const int32_t camera_height_v{primaryDisplay.h};
-
-  constexpr uint32_t fps_lock_v{60};
-  constexpr uint32_t desired_fps_v{static_cast<uint32_t>(1000 / fps_lock_v)};
 
   HO::Window mainWindow{"Hell's Odyssey",
                         HO::Vec2<int32_t>{primaryDisplay.w, primaryDisplay.h},
@@ -64,8 +60,6 @@ int main(int argc, char *argv[])
                      "../assets/sprites/player_ship.png");
 
   auto start{SDL_GetTicks()};
-  int32_t framesDrawn{0};
-  int32_t frameCounter{0};
 
   gvdi::Instance instance{};
   if constexpr (enable_debug_v)
