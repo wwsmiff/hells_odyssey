@@ -15,23 +15,16 @@ Particle::Particle(const Vec2<float> &origin, const Vec2<float> &hSpread,
     : mOrigin{origin}, mPosition{origin},
       mVelocity{Random::Float(hSpread.x, hSpread.y),
                 Random::Float(vSpread.x, vSpread.y)},
-      mLifespan{255.0f}, mDecayRate{decayRate}, mColor{color}, mElapsedTime{0}
+      mLifespan{255.0f}, mDecayRate{decayRate}, mColor{color}
 {
 }
 
 void Particle::update(float delta)
 {
-  static auto elapsedTime{0};
-  elapsedTime += delta;
-
   if (this->mLifespan > 0.0f)
   {
-    if (elapsedTime > 10)
-    {
-      this->mPosition += this->mVelocity * delta;
-      this->mLifespan -= this->mDecayRate * delta;
-      elapsedTime = 0;
-    }
+    this->mPosition += this->mVelocity * delta;
+    this->mLifespan -= this->mDecayRate * delta;
   }
   else if (this->mLifespan <= 0.0f)
   {
@@ -69,8 +62,16 @@ ParticleSystem::ParticleSystem(size_t noOfParticles, const Vec2<float> &origin,
 
 void ParticleSystem::update(float delta)
 {
-  for (auto &p : this->mParticles)
-    p.update(delta);
+  for (size_t i = 0; i < this->mParticles.size(); ++i)
+  {
+    if (this->mCounter > 50)
+    {
+      this->mParticles[i].update(delta);
+      this->mCounter = 0;
+    }
+    else
+      this->mCounter++;
+  }
 }
 
 void ParticleSystem::render(SDL_Renderer *renderer)
@@ -83,6 +84,14 @@ void ParticleSystem::setOrigin(const Vec2<float> &origin)
 {
   for (auto &p : this->mParticles)
     p.mOrigin = origin;
+}
+
+void ParticleSystem::moveParticles(Vec2<float> offset)
+{
+  for (auto &p : this->mParticles)
+  {
+    p.mPosition += offset;
+  }
 }
 
 /* End */

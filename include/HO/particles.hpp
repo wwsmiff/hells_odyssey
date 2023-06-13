@@ -25,7 +25,6 @@ protected:
   float mLifespan{};
   float mDecayRate{};
   Rgba mColor{};
-  float mElapsedTime{};
 };
 
 class ParticleSystem
@@ -38,9 +37,11 @@ public:
   void update(float delta);
   void render(SDL_Renderer *renderer);
   void setOrigin(const Vec2<float> &origin);
+  void moveParticles(Vec2<float> offset);
 
 protected:
   std::vector<Particle> mParticles;
+  size_t mCounter;
 };
 
 }; // namespace HO

@@ -19,9 +19,7 @@ void Entity::render(SDL_Renderer *renderer)
   if (Config::debugView)
   {
     SDL_SetRenderDrawColor(renderer, mColor.r, mColor.g, mColor.b, mColor.a);
-    SDL_RenderDrawRect(renderer, &(this->mRenderRect));
-    SDL_SetRenderDrawColor(renderer, 255, 68, 78, 255);
-    SDL_RenderDrawRect(renderer, &(this->mHitbox));
+    SDL_RenderFillRect(renderer, &(this->mRenderRect));
   }
   else
   {

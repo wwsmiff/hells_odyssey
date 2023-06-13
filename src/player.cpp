@@ -182,28 +182,53 @@ void Player::update(float delta)
   if (this->mPlayerLeft)
   {
     if ((this->mPosition.x - Config::padding_v) > this->mHorizontalBounds.x)
+    {
       this->move(HO::Vec2<float>{
           (delta * this->mPlayerDirection.x * HO::Config::playerVelocity), 0});
+      this->mRightThruster.moveParticles(Vec2<float>{
+          delta * this->mPlayerDirection.x * Config::playerVelocity, 0});
+      this->mLeftThruster.moveParticles(Vec2<float>{
+          delta * this->mPlayerDirection.x * Config::playerVelocity, 0});
+    }
   }
   if (this->mPlayerRight)
   {
     if ((this->mPosition.x + this->mSize.x + Config::padding_v) <
         this->mHorizontalBounds.y)
+    {
       this->move(Vec2<float>{
           (delta * this->mPlayerDirection.x * HO::Config::playerVelocity), 0});
+      this->mRightThruster.moveParticles(Vec2<float>{
+          delta * this->mPlayerDirection.x * Config::playerVelocity, 0});
+      this->mLeftThruster.moveParticles(Vec2<float>{
+          delta * this->mPlayerDirection.x * Config::playerVelocity, 0});
+    }
   }
   if (this->mPlayerUp)
   {
     if (this->mPosition.y > (this->mVerticalBounds.x + Config::padding_v))
+    {
       this->move(Vec2<float>{
           0, (delta * this->mPlayerDirection.y * HO::Config::playerVelocity)});
+      this->mRightThruster.moveParticles(Vec2<float>{
+          0, delta * this->mPlayerDirection.y * Config::playerVelocity});
+      this->mLeftThruster.moveParticles(Vec2<float>{
+          0, delta * this->mPlayerDirection.y * Config::playerVelocity});
+    }
   }
   if (this->mPlayerDown)
   {
     if ((this->mPosition.y + this->mSize.y + Config::padding_v) <
         this->mVerticalBounds.y)
+    {
       this->move(Vec2<float>{
           0, (delta * this->mPlayerDirection.y * HO::Config::playerVelocity)});
+
+      this->mRightThruster.moveParticles(Vec2<float>{
+          0, delta * this->mPlayerDirection.y * Config::playerVelocity});
+      this->mLeftThruster.moveParticles(Vec2<float>{
+          0, delta * this->mPlayerDirection.y * Config::playerVelocity});
+    }
   }
 
   for (auto &bullet : this->mBullets)
