@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 
-constexpr inline bool enable_debug_v{false};
+constexpr inline bool enable_debug_v{true};
 
 namespace HO
 {

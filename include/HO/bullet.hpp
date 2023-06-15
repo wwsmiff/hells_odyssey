@@ -11,7 +11,7 @@ namespace HO
 {
 enum BulletType : uint8_t
 {
-  CLASSIC,
+  CLASSIC = 0,
   DOUBLE,
 };
 
@@ -33,7 +33,7 @@ public:
   Vec2<float> getOrigin() const;
 
 protected:
-  uint8_t mType;
+  uint8_t mType{};
   bool mActive{};
   Vec2<float> mOrigin{};
   Vec2<float> mSize{};

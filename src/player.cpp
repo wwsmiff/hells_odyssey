@@ -9,7 +9,7 @@
 namespace HO
 {
 Player::Player(const Vec2<float> &position, const Vec2<float> &size)
-    : Entity(position, size), mBullets(200),
+    : Entity(position, size),
       mLeftThruster{25,
                     Vec2<float>{(this->mPosition.x + 58),
                                 (this->mPosition.y + this->mSize.y - 32)},
@@ -25,11 +25,13 @@ Player::Player(const Vec2<float> &position, const Vec2<float> &size)
                      25.0f,
                      Rgba{200, 200, 200, 255}}
 {
-  for (auto &bullet : this->mBullets)
-    bullet =
-        Bullet{DOUBLE, Vec2<float>{((this->mPosition.x + (this->mSize.x / 2)) -
-                                    (Config::bulletHitbox / 2)),
-                                   position.y}};
+  for (size_t i = 0; i < 200; ++i)
+  {
+    this->mBullets.emplace_back(
+        DOUBLE, Vec2<float>{((this->mPosition.x + (this->mSize.x / 2)) -
+                             (Config::bulletHitbox / 2)),
+                            position.y});
+  }
 }
 
 void Player::move(const Vec2<float> &offset)
@@ -85,9 +87,8 @@ void Player::handleEvents(const InputManager &inputManager)
     this->mPlayerDirection.y = 1;
   }
 
-  if (inputManager.isKeyHeld(SDLK_SPACE))
+  if (inputManager.wasKeyPressed(SDLK_SPACE))
   {
-
     for (size_t i = 0; i < this->mBullets.size(); ++i)
     {
       if (!this->mBullets[i].active())
@@ -103,6 +104,7 @@ void Player::handleEvents(const InputManager &inputManager)
     static size_t i{0};
     if (!this->mBullets[i].active())
       this->mBullets[i].fire();
+
     if (this->mElapsedTime > 100)
     {
       i = (i < this->mBullets.size()) ? i + 1 : 0;
