@@ -15,6 +15,7 @@ FetchContent_MakeAvailable(SDL2)
 FetchContent_GetProperties(SDL2
   SOURCE_DIRECTORY SDL2_SOURCE_DIR
 )
+
 FetchContent_Declare(
   SDL2_image
   GIT_REPOSITORY https://github.com/libsdl-org/SDL_image
@@ -27,7 +28,6 @@ FetchContent_GetProperties(SDL2
   SOURCE_DIRECTORY SDL2_IMAGE_SOURCE_DIR
 )
 
-
 FetchContent_Declare(
   gvdi
   GIT_REPOSITORY https://github.com/karnkaul/gvdi
@@ -35,12 +35,19 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(gvdi)
 
+FetchContent_Declare(
+  tweaky
+  GIT_REPOSITORY https://github.com/cpp-gamedev/tweaky
+  GIT_TAG 61ac7d8
+)
+FetchContent_MakeAvailable(tweaky)
+
 add_executable(${PROJECT_NAME})
 target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic)
 target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include")
 target_include_directories(${PROJECT_NAME} PRIVATE "${SDL2_SOURCE_DIR}/include")
 target_include_directories(${PROJECT_NAME} PRIVATE "${SDL2_IMAGE_SOURCE_DIR}/include")
-target_link_libraries(${PROJECT_NAME} PRIVATE SDL2::SDL2main SDL2::SDL2-static SDL2_image::SDL2_image-static gvdi::gvdi)
+target_link_libraries(${PROJECT_NAME} PRIVATE SDL2::SDL2main SDL2::SDL2-static SDL2_image::SDL2_image-static gvdi::gvdi tweaky::lib)
 target_sources(${PROJECT_NAME} PRIVATE 
  src/main.cpp
  src/window.cpp

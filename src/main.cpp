@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
   SDL_GetDesktopDisplayMode(0, &primaryDisplay);
 
   constexpr int32_t camera_width_v{800};
-  const int32_t camera_height_v{primaryDisplay.h};
+  // const int32_t camera_height_v{primaryDisplay.h};
 
   HO::Window mainWindow{"Hell's Odyssey",
                         HO::Vec2<int32_t>{primaryDisplay.w, primaryDisplay.h},
@@ -35,9 +35,9 @@ int main(int argc, char *argv[])
       static_cast<uint32_t>(gameBackground.y),
       static_cast<uint32_t>(gameBackground.y + gameBackground.h)};
 
-  auto fromLeft = [=](float n) { return gameBoundsHorizontal.x + n; };
-  auto fromRight = [=](float n) { return gameBoundsHorizontal.y - n; };
-  auto fromTop = [=](float n) { return gameBoundsVertical.x + n; };
+  // auto fromLeft = [=](float n) { return gameBoundsHorizontal.x + n; };
+  // auto fromRight = [=](float n) { return gameBoundsHorizontal.y - n; };
+  // auto fromTop = [=](float n) { return gameBoundsVertical.x + n; };
   auto fromBottom = [=](float n) { return gameBoundsVertical.y - n; };
 
   HO::Player player{
@@ -59,16 +59,23 @@ int main(int argc, char *argv[])
   player.loadTexture(mainWindow.getRenderer(),
                      "../assets/sprites/player_ship.png");
 
-  auto start{SDL_GetTicks()};
-
   gvdi::Instance instance{};
   if constexpr (enable_debug_v)
     instance = gvdi::Instance{{500, 600}, "Tweaks"};
 
   HO::InputManager windowInput{};
 
+  auto elapsedTime{0};
+
+  // auto start{std::chrono::steady_clock::now()};
+  auto start{SDL_GetTicks()};
+  auto frame{0};
+  auto fps{0};
   while (running)
   {
+    // auto current{std::chrono::steady_clock::now()};
+    // auto delta{std::chrono::duration<float, std::milli>(current - start)};
+
     auto current{SDL_GetTicks()};
     auto delta{current - start};
 
@@ -86,7 +93,7 @@ int main(int argc, char *argv[])
                                      HO::Config::playerBlocksize});
     }
 
-    player.update(static_cast<float>(delta));
+    player.update(delta);
 
     mainWindow.clear(HO::Rgba{0x00'00'00'ff});
 
@@ -119,6 +126,15 @@ int main(int argc, char *argv[])
       ImGui::End();
     }
 
+    elapsedTime += delta;
+    frame++;
+    if (elapsedTime > 1000)
+    {
+      fps = frame;
+      elapsedTime = 0;
+      frame = 0;
+    }
+    // std::cout << fps << std::endl;
     start = current;
   }
 

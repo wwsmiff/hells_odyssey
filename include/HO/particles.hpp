@@ -14,7 +14,6 @@ public:
   Particle(const Vec2<float> &origin, const Vec2<float> &hSpread,
            const Vec2<float> &vSpread, float decayRate, const Rgba &color);
   void update(float delta);
-  void render(SDL_Renderer *renderer);
 
   friend class ParticleSystem;
 
@@ -22,6 +21,7 @@ protected:
   Vec2<float> mOrigin{};
   Vec2<float> mPosition{};
   Vec2<float> mVelocity{};
+  Vec2<float> mSize{};
   float mLifespan{};
   float mDecayRate{};
   Rgba mColor{};
@@ -41,7 +41,6 @@ public:
 
 protected:
   std::vector<Particle> mParticles;
-  size_t mCounter;
 };
 
 }; // namespace HO

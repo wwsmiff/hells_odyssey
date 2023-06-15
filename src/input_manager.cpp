@@ -36,7 +36,6 @@ void InputManager::beginNewFrame()
     else if (this->mEvent.type == SDL_KEYUP)
     {
       this->mReleasedKeys.insert(this->mEvent.key.keysym.sym);
-      auto it = this->mHeldKeys.find(this->mEvent.key.keysym.sym);
       this->mHeldKeys.erase(this->mEvent.key.keysym.sym);
     }
 
@@ -91,7 +90,6 @@ void InputManager::beginNewFrame()
 
 bool InputManager::wasKeyPressed(SDL_Keycode key) const
 {
-
   return this->mPressedKeys.contains(key);
 }
 bool InputManager::wasKeyReleased(SDL_Keycode key) const

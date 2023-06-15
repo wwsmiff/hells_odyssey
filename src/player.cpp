@@ -10,14 +10,14 @@ namespace HO
 {
 Player::Player(const Vec2<float> &position, const Vec2<float> &size)
     : Entity(position, size), mBullets(200),
-      mLeftThruster{50,
+      mLeftThruster{25,
                     Vec2<float>{(this->mPosition.x + 58),
                                 (this->mPosition.y + this->mSize.y - 32)},
                     Vec2<float>{-1.0f, 1.0f},
                     Vec2<float>{0.0f, 4.0f},
                     25.0f,
                     Rgba{200, 200, 200, 255}},
-      mRightThruster{50,
+      mRightThruster{25,
                      Vec2<float>{(this->mPosition.x + this->mSize.x - 70),
                                  (this->mPosition.y + this->mSize.y - 32)},
                      Vec2<float>{-1.0f, 1.0f},
@@ -59,33 +59,33 @@ void Player::move(const Vec2<float> &offset)
 
 void Player::handleEvents(const InputManager &inputManager)
 {
-  if (inputManager.wasKeyPressed(SDLK_d))
+  if (inputManager.isKeyHeld(SDLK_d))
   {
     this->mPlayerLeft = false;
     this->mPlayerRight = true;
 
     this->mPlayerDirection.x = 1;
   }
-  if (inputManager.wasKeyPressed(SDLK_a))
+  if (inputManager.isKeyHeld(SDLK_a))
   {
     this->mPlayerRight = false;
     this->mPlayerLeft = true;
     this->mPlayerDirection.x = -1;
   }
-  if (inputManager.wasKeyPressed(SDLK_w))
+  if (inputManager.isKeyHeld(SDLK_w))
   {
     this->mPlayerDown = false;
     this->mPlayerUp = true;
     this->mPlayerDirection.y = -1;
   }
-  if (inputManager.wasKeyPressed(SDLK_s))
+  if (inputManager.isKeyHeld(SDLK_s))
   {
     this->mPlayerUp = false;
     this->mPlayerDown = true;
     this->mPlayerDirection.y = 1;
   }
 
-  if (inputManager.wasKeyPressed(SDLK_SPACE))
+  if (inputManager.isKeyHeld(SDLK_SPACE))
   {
 
     for (size_t i = 0; i < this->mBullets.size(); ++i)
@@ -177,6 +177,9 @@ void Player::update(float delta)
 {
   this->mElapsedTime += delta;
 
+  this->mLeftThruster.update(delta);
+  this->mRightThruster.update(delta);
+
   this->mPlayerDirection.normalize();
 
   if (this->mPlayerLeft)
@@ -233,9 +236,6 @@ void Player::update(float delta)
 
   for (auto &bullet : this->mBullets)
     bullet.update(delta);
-
-  this->mLeftThruster.update(delta);
-  this->mRightThruster.update(delta);
 }
 
 void Player::render(SDL_Renderer *renderer)
