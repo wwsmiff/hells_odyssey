@@ -21,6 +21,7 @@ public:
   Bullet();
   Bullet(uint8_t type, const Vec2<float> &origin);
   void update(float delta);
+  void move(Vec2<float> offset);
   bool active() const;
   void active(bool state);
   void render(SDL_Renderer *renderer);

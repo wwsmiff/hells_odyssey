@@ -9,11 +9,12 @@ namespace HO
 Bullet::Bullet() {}
 
 Bullet::Bullet(uint8_t type, const Vec2<float> &origin)
-    : mType{type}, mActive{false}, mOrigin{origin}, mHitboxes{}
+    : mType{type}, mActive{false}, mOrigin{origin}, mTexture{}, mHitboxes{},
+      mColor{}
 {
   if (this->mType == CLASSIC)
   {
-    this->mSize = {Config::bulletHitbox, Config::bulletHitbox};
+    this->mSize = {Config::bulletHitboxWidth, Config::bulletHitboxHeight};
     this->mColor = {0, 255, 255, 255};
     this->mHitboxes.push_back(SDL_Rect{static_cast<int32_t>(this->mOrigin.x),
                                        static_cast<int32_t>(this->mOrigin.y),
@@ -22,7 +23,7 @@ Bullet::Bullet(uint8_t type, const Vec2<float> &origin)
   }
   else if (this->mType == DOUBLE)
   {
-    this->mSize = {Config::bulletHitbox, Config::bulletHitbox};
+    this->mSize = {Config::bulletHitboxWidth, Config::bulletHitboxHeight};
     this->mColor = {0, 60, 255, 255};
     this->mHitboxes.push_back(
         SDL_Rect{static_cast<int32_t>((this->mOrigin.x - (this->mSize.x * 2))),
@@ -85,8 +86,8 @@ void Bullet::update(float delta)
     }
     else if (this->mType == DOUBLE)
     {
-      this->mHitboxes[0].x = this->mOrigin.x - (Config::bulletHitbox * 2);
-      this->mHitboxes[1].x = this->mOrigin.x + (Config::bulletHitbox * 2);
+      this->mHitboxes[0].x = this->mOrigin.x - (this->mSize.x * 2);
+      this->mHitboxes[1].x = this->mOrigin.x + (this->mSize.x * 2);
       this->mHitboxes[0].y = this->mHitboxes[1].y = this->mOrigin.y;
     }
   }
@@ -102,6 +103,9 @@ void Bullet::fire()
 }
 void Bullet::render(SDL_Renderer *renderer)
 {
+  if (!this->mTexture.get())
+    this->mTexture.load(renderer, "../assets/sprites/player_bullet.png");
+
   if (Config::debugView)
   {
     SDL_SetRenderDrawColor(renderer, this->mColor.r, this->mColor.g,
@@ -121,22 +125,22 @@ void Bullet::render(SDL_Renderer *renderer)
         vertices.push_back(SDL_Vertex{
             {static_cast<float>(hitbox.x),
              static_cast<float>(hitbox.y) + static_cast<float>(hitbox.h)},
-            {this->mColor.r, this->mColor.g, this->mColor.b, this->mColor.a},
-            {0, 0}});
+            {255, 255, 255, this->mColor.a},
+            {0.0f, 1.0f}});
         vertices.push_back(SDL_Vertex{
             {static_cast<float>(hitbox.x) + static_cast<float>(hitbox.w),
              static_cast<float>(hitbox.y + hitbox.h)},
-            {this->mColor.r, this->mColor.g, this->mColor.b, this->mColor.a},
-            {0, 0}});
+            {255, 255, 255, this->mColor.a},
+            {1.0f, 1.0f}});
         vertices.push_back(SDL_Vertex{
             {static_cast<float>(hitbox.x) + static_cast<float>(hitbox.w),
              static_cast<float>(hitbox.y)},
-            {this->mColor.r, this->mColor.g, this->mColor.b, this->mColor.a},
-            {0, 0}});
+            {255, 255, 255, this->mColor.a},
+            {1.0f, 0.0f}});
         vertices.push_back(SDL_Vertex{
             {static_cast<float>(hitbox.x), static_cast<float>(hitbox.y)},
-            {this->mColor.r, this->mColor.g, this->mColor.b, this->mColor.a},
-            {0, 0}});
+            {255, 255, 255, this->mColor.a},
+            {0.0f, 0.0f}});
 
         indices.push_back(offset);
         indices.push_back(offset + 1);
@@ -146,8 +150,8 @@ void Bullet::render(SDL_Renderer *renderer)
         indices.push_back(offset);
       }
 
-      SDL_RenderGeometry(renderer, nullptr, vertices.data(), vertices.size(),
-                         indices.data(), indices.size());
+      SDL_RenderGeometry(renderer, mTexture.get(), vertices.data(),
+                         vertices.size(), indices.data(), indices.size());
     }
   }
 }

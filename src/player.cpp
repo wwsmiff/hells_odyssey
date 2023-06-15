@@ -29,7 +29,7 @@ Player::Player(const Vec2<float> &position, const Vec2<float> &size)
   {
     this->mBullets.emplace_back(
         DOUBLE, Vec2<float>{((this->mPosition.x + (this->mSize.x / 2)) -
-                             (Config::bulletHitbox / 2)),
+                             (Config::bulletHitboxWidth / 2)),
                             position.y});
   }
 }
