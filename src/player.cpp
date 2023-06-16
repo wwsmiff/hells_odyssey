@@ -30,7 +30,7 @@ Player::Player(const Vec2<float> &position, const Vec2<float> &size)
     this->mBullets.emplace_back(
         DOUBLE, Vec2<float>{((this->mPosition.x + (this->mSize.x / 2)) -
                              (Config::bulletHitboxWidth / 2)),
-                            position.y});
+                            position.y + 50});
   }
 }
 
@@ -50,7 +50,7 @@ void Player::move(const Vec2<float> &offset)
   for (auto &bullet : this->mBullets)
     bullet.setOrigin(Vec2<float>{
         ((this->mPosition.x + (this->mSize.x / 2)) - (bullet.getSize().x / 2)),
-        this->mPosition.y});
+        this->mPosition.y + 50});
 
   mLeftThruster.setOrigin(Vec2<float>{
       (this->mPosition.x + 58), (this->mPosition.y + this->mSize.y - 32)});
@@ -105,7 +105,7 @@ void Player::handleEvents(const InputManager &inputManager)
     if (!this->mBullets[i].active())
       this->mBullets[i].fire();
 
-    if (this->mElapsedTime > 100)
+    if (this->mElapsedTime > 75)
     {
       i = (i < this->mBullets.size()) ? i + 1 : 0;
       this->mElapsedTime = 0;
@@ -194,6 +194,11 @@ void Player::update(float delta)
           delta * this->mPlayerDirection.x * Config::playerVelocity, 0});
       this->mLeftThruster.moveParticles(Vec2<float>{
           delta * this->mPlayerDirection.x * Config::playerVelocity, 0});
+
+      for (auto &bullet : this->mBullets)
+        bullet.move(Vec2<float>{delta * this->mPlayerDirection.x *
+                                    (Config::playerVelocity - 0.3f),
+                                0});
     }
   }
   if (this->mPlayerRight)
@@ -207,6 +212,11 @@ void Player::update(float delta)
           delta * this->mPlayerDirection.x * Config::playerVelocity, 0});
       this->mLeftThruster.moveParticles(Vec2<float>{
           delta * this->mPlayerDirection.x * Config::playerVelocity, 0});
+
+      for (auto &bullet : this->mBullets)
+        bullet.move(Vec2<float>{delta * this->mPlayerDirection.x *
+                                    (Config::playerVelocity - 0.3f),
+                                0});
     }
   }
   if (this->mPlayerUp)

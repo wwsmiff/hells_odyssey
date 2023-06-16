@@ -134,7 +134,7 @@ int main(int argc, char *argv[])
       elapsedTime = 0;
       frame = 0;
     }
-    // std::cout << fps << std::endl;
+    std::cout << fps << std::endl;
     start = current;
   }
 
