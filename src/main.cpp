@@ -5,7 +5,8 @@
 
 int main(int argc, char *argv[])
 {
-  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK) != 0)
+  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER) !=
+      0)
   {
     std::cout << "Failed to initialize SDL2, " << SDL_GetError() << std::endl;
     return 1;
@@ -134,7 +135,7 @@ int main(int argc, char *argv[])
       elapsedTime = 0;
       frame = 0;
     }
-    std::cout << fps << std::endl;
+    // std::cout << fps << std::endl;
     start = current;
   }
 

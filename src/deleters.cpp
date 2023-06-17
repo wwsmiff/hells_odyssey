@@ -21,5 +21,11 @@ void SdlDeleter::operator()(SDL_Joystick *joystick) const
 {
   SDL_JoystickClose(joystick);
 }
+void SdlDeleter::operator()(SDL_GameController *gameController) const
+{
+
+  SDL_GameControllerClose(gameController);
+}
+
 }; // namespace Deleters
 }; // namespace HO

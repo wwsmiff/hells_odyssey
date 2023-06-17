@@ -32,6 +32,7 @@ public:
 
   Vec2<float> getSize() const;
   Vec2<float> getOrigin() const;
+  Vec2<float> getPosition() const;
 
 protected:
   uint8_t mType{};
