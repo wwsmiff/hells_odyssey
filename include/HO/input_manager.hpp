@@ -6,9 +6,11 @@
 #include <SDL.h>
 #include <array>
 #include <cstdint>
+#include <functional>
 #include <memory>
-#include <set>
 #include <string>
+#include <unordered_map>
+#include <unordered_set>
 
 enum JoystickAxis : uint8_t
 {
@@ -43,21 +45,20 @@ public:
   bool gameControllerAxisDown() const;
   bool gameControllerAxisNone() const;
 
-  // bool gameControllerButtonPressed(SDL_JoyButtonEvent) const;
-
   HO::Vec2<int32_t> gameControllerAxis;
   HO::Vec2<int32_t> mousePosition;
+  std::unordered_map<SDL_EventType, std::function<void(void)>> callbacks;
 
 protected:
   SDL_Event mEvent;
   std::unique_ptr<SDL_GameController, Deleters::SdlDeleter>
       mPrimaryGameController{};
-  std::set<SDL_Keycode> mHeldKeys{};
-  std::set<SDL_Keycode> mPressedKeys{};
-  std::set<SDL_Keycode> mReleasedKeys{};
-  std::set<uint8_t> mHeldButtons{};
-  std::set<uint8_t> mPressedButtons{};
-  std::set<uint8_t> mReleasedButtons{};
+  std::unordered_set<SDL_Keycode> mHeldKeys{};
+  std::unordered_set<SDL_Keycode> mPressedKeys{};
+  std::unordered_set<SDL_Keycode> mReleasedKeys{};
+  std::unordered_set<uint8_t> mHeldButtons{};
+  std::unordered_set<uint8_t> mPressedButtons{};
+  std::unordered_set<uint8_t> mReleasedButtons{};
   std::array<bool, 4> mGameControllerAxis{};
   uint32_t mJoysticksConnected{};
 };

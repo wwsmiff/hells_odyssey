@@ -61,26 +61,34 @@ void Player::move(const Vec2<float> &offset)
 
 void Player::handleEvents(const InputManager &inputManager)
 {
-  if (inputManager.isKeyHeld(SDLK_d) || inputManager.gameControllerAxisRight())
+  if (inputManager.isKeyHeld(SDLK_d) ||
+      inputManager.wasButtonPressed(SDL_CONTROLLER_BUTTON_DPAD_RIGHT) ||
+      inputManager.gameControllerAxisRight())
   {
     this->mPlayerLeft = false;
     this->mPlayerRight = true;
 
     this->mPlayerDirection.x = 1;
   }
-  if (inputManager.isKeyHeld(SDLK_a) || inputManager.gameControllerAxisLeft())
+  if (inputManager.isKeyHeld(SDLK_a) ||
+      inputManager.wasButtonPressed(SDL_CONTROLLER_BUTTON_DPAD_LEFT) ||
+      inputManager.gameControllerAxisLeft())
   {
     this->mPlayerRight = false;
     this->mPlayerLeft = true;
     this->mPlayerDirection.x = -1;
   }
-  if (inputManager.isKeyHeld(SDLK_w) || inputManager.gameControllerAxisUp())
+  if (inputManager.isKeyHeld(SDLK_w) ||
+      inputManager.wasButtonPressed(SDL_CONTROLLER_BUTTON_DPAD_UP) ||
+      inputManager.gameControllerAxisUp())
   {
     this->mPlayerDown = false;
     this->mPlayerUp = true;
     this->mPlayerDirection.y = -1;
   }
-  if (inputManager.isKeyHeld(SDLK_s) || inputManager.gameControllerAxisDown())
+  if (inputManager.isKeyHeld(SDLK_s) ||
+      inputManager.wasButtonPressed(SDL_CONTROLLER_BUTTON_DPAD_DOWN) ||
+      inputManager.gameControllerAxisDown())
   {
     this->mPlayerUp = false;
     this->mPlayerDown = true;
@@ -100,74 +108,50 @@ void Player::handleEvents(const InputManager &inputManager)
       break;
     }
   }
+
   if (inputManager.isKeyHeld(SDLK_SPACE) ||
       inputManager.isButtonHeld(SDL_CONTROLLER_BUTTON_X))
   {
-    static size_t i{0};
-    if (!this->mBullets[i].active())
-      this->mBullets[i].fire();
+    if (!this->mBullets.at(this->mBulletIndex).active())
+      this->mBullets.at(this->mBulletIndex).fire();
 
     if (this->mElapsedTime > 75)
     {
-      i = (i < this->mBullets.size()) ? i + 1 : 0;
+      this->mBulletIndex = (this->mBulletIndex < this->mBullets.size() - 1)
+                               ? this->mBulletIndex + 1
+                               : 0;
       this->mElapsedTime = 0;
     }
   }
-  if (inputManager.wasKeyReleased(SDLK_d))
+  if (inputManager.wasKeyReleased(SDLK_d) ||
+      inputManager.wasButtonReleased(SDL_CONTROLLER_BUTTON_DPAD_RIGHT) ||
+      !inputManager.gameControllerAxisRight())
     this->mPlayerRight = false;
-  if (inputManager.wasKeyReleased(SDLK_a))
+  if (inputManager.wasKeyReleased(SDLK_a) ||
+      inputManager.wasButtonReleased(SDL_CONTROLLER_BUTTON_DPAD_LEFT) ||
+      !inputManager.gameControllerAxisLeft())
     this->mPlayerLeft = false;
 
-  if (inputManager.wasKeyReleased(SDLK_w))
+  if (inputManager.wasKeyReleased(SDLK_w) ||
+      inputManager.wasButtonReleased(SDL_CONTROLLER_BUTTON_DPAD_UP) ||
+      !inputManager.gameControllerAxisUp())
     this->mPlayerUp = false;
-  if (inputManager.wasKeyReleased(SDLK_s))
+  if (inputManager.wasKeyReleased(SDLK_s) ||
+      inputManager.wasButtonReleased(SDL_CONTROLLER_BUTTON_DPAD_DOWN) ||
+      !inputManager.gameControllerAxisDown())
     this->mPlayerDown = false;
 
-  if (inputManager.wasKeyReleased(SDLK_a) &&
-      inputManager.wasKeyReleased(SDLK_d))
+  if ((inputManager.wasKeyReleased(SDLK_a) &&
+       inputManager.wasKeyReleased(SDLK_d)) ||
+      (inputManager.wasButtonReleased(SDL_CONTROLLER_BUTTON_DPAD_LEFT) &&
+       inputManager.wasButtonReleased(SDL_CONTROLLER_BUTTON_DPAD_RIGHT)))
     this->mPlayerDirection.x = 0;
 
-  if (inputManager.wasKeyReleased(SDLK_w) &&
-      inputManager.wasKeyReleased(SDLK_s))
+  if ((inputManager.wasKeyReleased(SDLK_w) &&
+       inputManager.wasKeyReleased(SDLK_s)) ||
+      (inputManager.wasButtonReleased(SDL_CONTROLLER_BUTTON_DPAD_UP) &&
+       inputManager.wasButtonReleased(SDL_CONTROLLER_BUTTON_DPAD_DOWN)))
     this->mPlayerDirection.y = 0;
-
-  // /* Joystick support */
-  if (inputManager.eventOccurred(SDL_JOYAXISMOTION))
-  {
-    if (inputManager.gameControllerAxisUp())
-    {
-      this->mPlayerDown = false;
-      this->mPlayerUp = true;
-      this->mPlayerDirection.y = -1;
-    }
-    else if (inputManager.gameControllerAxisDown())
-    {
-      this->mPlayerUp = false;
-      this->mPlayerDown = true;
-      this->mPlayerDirection.y = 1;
-    }
-    else if (inputManager.gameControllerAxisLeft())
-    {
-      this->mPlayerRight = false;
-      this->mPlayerLeft = true;
-      this->mPlayerDirection.x = -1;
-    }
-    else if (inputManager.gameControllerAxisRight())
-    {
-      this->mPlayerLeft = false;
-      this->mPlayerRight = true;
-      this->mPlayerDirection.x = 1;
-    }
-    else
-    {
-      this->mPlayerUp = false;
-      this->mPlayerDown = false;
-      this->mPlayerDirection.y = 0;
-      this->mPlayerLeft = false;
-      this->mPlayerRight = false;
-      this->mPlayerDirection.x = 0;
-    }
-  }
 }
 
 void Player::update(float delta)
@@ -213,6 +197,10 @@ void Player::update(float delta)
           0, delta * this->mPlayerDirection.y * Config::playerVelocity});
       this->mLeftThruster.moveParticles(Vec2<float>{
           0, delta * this->mPlayerDirection.y * Config::playerVelocity});
+
+      this->mBullets.at(this->mBulletIndex)
+          .move(Vec2<float>{0, delta * this->mPlayerDirection.y *
+                                   (HO::Config::playerVelocity - 0.3f)});
     }
   }
   if (this->mPlayerDown)

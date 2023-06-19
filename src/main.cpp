@@ -21,6 +21,9 @@ int main(int argc, char *argv[])
   HO::Window mainWindow{"Hell's Odyssey",
                         HO::Vec2<int32_t>{primaryDisplay.w, primaryDisplay.h},
                         SDL_WINDOW_FULLSCREEN_DESKTOP};
+
+  // HO::Window mainWindow{"Hell's Odyssey", HO::Vec2<int32_t>{800, 1024},
+  //                       SDL_WINDOW_SHOWN};
   bool running{true};
 
   SDL_Rect gameBackground{0, 0, camera_width_v, 0};
@@ -66,23 +69,22 @@ int main(int argc, char *argv[])
 
   HO::InputManager windowInput{};
 
-  auto elapsedTime{0};
+  std::chrono::duration<float, std::milli> elapsedTime{};
 
-  // auto start{std::chrono::steady_clock::now()};
-  auto start{SDL_GetTicks()};
+  auto start{std::chrono::steady_clock::now()};
+
+  windowInput.callbacks.insert(
+      std::make_pair<SDL_EventType, std::function<void(void)>>(
+          SDL_QUIT, [&]() { running = false; }));
+
   auto frame{0};
   auto fps{0};
   while (running)
   {
-    // auto current{std::chrono::steady_clock::now()};
-    // auto delta{std::chrono::duration<float, std::milli>(current - start)};
-
-    auto current{SDL_GetTicks()};
-    auto delta{current - start};
+    auto current{std::chrono::steady_clock::now()};
+    auto delta{std::chrono::duration<float, std::milli>(current - start)};
 
     windowInput.beginNewFrame();
-    if (windowInput.eventOccurred(SDL_QUIT))
-      running = false;
 
     player.handleEvents(windowInput);
 
@@ -94,7 +96,7 @@ int main(int argc, char *argv[])
                                      HO::Config::playerBlocksize});
     }
 
-    player.update(delta);
+    player.update(delta.count());
 
     mainWindow.clear(HO::Rgba{0x00'00'00'ff});
 
@@ -124,15 +126,23 @@ int main(int argc, char *argv[])
       int32_t playerHitboxInt{static_cast<int32_t>(HO::Config::playerHitbox)};
       ImGui::SliderInt("Hitbox size", &playerHitboxInt, 0, 1024);
       HO::Config::playerHitbox = static_cast<uint32_t>(playerHitboxInt);
+
+      ImGui::SliderFloat("Bullet velocity", &HO::Config::bulletVelocity, 0.0f,
+                         5.0f);
+      ImGui::SliderFloat("Bullet width", &HO::Config::bulletHitboxWidth, 0.0f,
+                         50.0f);
+      ImGui::SliderFloat("Bullet height", &HO::Config::bulletHitboxHeight, 0.0f,
+                         100.0f);
+
       ImGui::End();
     }
 
     elapsedTime += delta;
     frame++;
-    if (elapsedTime > 1000)
+    if (elapsedTime > std::chrono::seconds(1))
     {
       fps = frame;
-      elapsedTime = 0;
+      elapsedTime = std::chrono::duration<float, std::milli>{0};
       frame = 0;
     }
     // std::cout << fps << std::endl;

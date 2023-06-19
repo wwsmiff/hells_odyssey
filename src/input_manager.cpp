@@ -23,8 +23,17 @@ void InputManager::beginNewFrame()
 
   SDL_GetMouseState(&(this->mousePosition.x), &(this->mousePosition.y));
 
-  if (SDL_PollEvent(&(this->mEvent)))
+  while (SDL_PollEvent(&(this->mEvent)))
   {
+    for (const auto &callback : callbacks)
+    {
+      if (this->mEvent.type == callback.first)
+      {
+        if (callback.second)
+          callback.second();
+      }
+    }
+
     if (this->mEvent.type == SDL_KEYDOWN)
     {
       this->mPressedKeys.insert(this->mEvent.key.keysym.sym);
@@ -49,47 +58,46 @@ void InputManager::beginNewFrame()
 
     if (this->mEvent.type == SDL_CONTROLLERAXISMOTION)
     {
-      if (this->mEvent.caxis.which == 0) /* First Joystick */
+      if (SDL_GameControllerGetAxis(this->mPrimaryGameController.get(),
+                                    SDL_CONTROLLER_AXIS_LEFTX) <
+          -HO::Config::gameController_deadzone_v)
       {
-        if (this->mEvent.caxis.axis == 0) /* Horizontal axis */
-        {
-          if (this->mEvent.caxis.value < -HO::Config::gameController_deadzone_v)
-          {
-            this->mGameControllerAxis[JOYSTICK_RIGHT] = false;
-            this->mGameControllerAxis[JOYSTICK_LEFT] = true;
-          }
-          else if (this->mEvent.caxis.value >
-                   HO::Config::gameController_deadzone_v)
-          {
-            this->mGameControllerAxis[JOYSTICK_LEFT] = false;
-            this->mGameControllerAxis[JOYSTICK_RIGHT] = true;
-          }
-          else
-          {
-            this->mGameControllerAxis[JOYSTICK_RIGHT] = false;
-            this->mGameControllerAxis[JOYSTICK_LEFT] = false;
-          }
-        }
+        this->mGameControllerAxis[JOYSTICK_RIGHT] = false;
+        this->mGameControllerAxis[JOYSTICK_LEFT] = true;
+      }
+      else if (SDL_GameControllerGetAxis(this->mPrimaryGameController.get(),
+                                         SDL_CONTROLLER_AXIS_LEFTX) >
+               HO::Config::gameController_deadzone_v)
+      {
+        this->mGameControllerAxis[JOYSTICK_LEFT] = false;
+        this->mGameControllerAxis[JOYSTICK_RIGHT] = true;
+      }
+      else
+      {
+        this->mGameControllerAxis[JOYSTICK_RIGHT] = false;
+        this->mGameControllerAxis[JOYSTICK_LEFT] = false;
+      }
 
-        else if (this->mEvent.caxis.axis == 1) /* Vertical axis */
-        {
-          if (this->mEvent.caxis.value < -HO::Config::gameController_deadzone_v)
-          {
-            this->mGameControllerAxis[JOYSTICK_DOWN] = false;
-            this->mGameControllerAxis[JOYSTICK_UP] = true;
-          }
-          else if (this->mEvent.caxis.value >
-                   HO::Config::gameController_deadzone_v)
-          {
-            this->mGameControllerAxis[JOYSTICK_UP] = false;
-            this->mGameControllerAxis[JOYSTICK_DOWN] = true;
-          }
-          else
-          {
-            this->mGameControllerAxis[JOYSTICK_UP] = false;
-            this->mGameControllerAxis[JOYSTICK_DOWN] = false;
-          }
-        }
+      if (SDL_GameControllerGetAxis(this->mPrimaryGameController.get(),
+                                    SDL_CONTROLLER_AXIS_LEFTY) <
+          -HO::Config::gameController_deadzone_v)
+      {
+        // printf("UP\n");
+        this->mGameControllerAxis[JOYSTICK_DOWN] = false;
+        this->mGameControllerAxis[JOYSTICK_UP] = true;
+      }
+      else if (SDL_GameControllerGetAxis(this->mPrimaryGameController.get(),
+                                         SDL_CONTROLLER_AXIS_LEFTY) >
+               HO::Config::gameController_deadzone_v)
+      {
+        // printf("DOWN\n");
+        this->mGameControllerAxis[JOYSTICK_UP] = false;
+        this->mGameControllerAxis[JOYSTICK_DOWN] = true;
+      }
+      else
+      {
+        this->mGameControllerAxis[JOYSTICK_UP] = false;
+        this->mGameControllerAxis[JOYSTICK_DOWN] = false;
       }
     }
   }
@@ -157,5 +165,4 @@ uint32_t InputManager::gameControllersConnected() const
 {
   return this->mJoysticksConnected;
 }
-
 }; // namespace HO

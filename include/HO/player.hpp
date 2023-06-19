@@ -27,6 +27,7 @@ public:
 
 protected:
   std::vector<Bullet> mBullets;
+  size_t mBulletIndex{};
   bool mPlayerUp{}, mPlayerDown{}, mPlayerLeft{}, mPlayerRight{};
   Vec2<uint32_t> mHorizontalBounds{};
   Vec2<uint32_t> mVerticalBounds{};

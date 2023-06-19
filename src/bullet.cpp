@@ -41,6 +41,15 @@ Bullet::Bullet(uint8_t type, const Vec2<float> &origin)
 
 void Bullet::update(float delta)
 {
+  if constexpr (enable_debug_v)
+  {
+    for (auto &hitbox : this->mHitboxes)
+    {
+      hitbox.w = HO::Config::bulletHitboxWidth;
+      hitbox.h = HO::Config::bulletHitboxHeight;
+    }
+  }
+
   if (this->mActive)
   {
     if (this->mType == CLASSIC)
@@ -104,7 +113,7 @@ void Bullet::fire()
 void Bullet::render(SDL_Renderer *renderer)
 {
   if (!this->mTexture.get())
-    this->mTexture.load(renderer, "../assets/sprites/player_bullet.png");
+    this->mTexture.load(renderer, "../assets/sprites/player_bullet_2.png");
 
   if (Config::debugView)
   {
@@ -160,8 +169,8 @@ void Bullet::move(Vec2<float> offset)
 {
   for (auto &hitbox : this->mHitboxes)
   {
-    hitbox.x += offset.x;
-    hitbox.y += offset.y;
+    hitbox.x += static_cast<int32_t>(offset.x);
+    hitbox.y += static_cast<int32_t>(offset.y);
   }
 }
 

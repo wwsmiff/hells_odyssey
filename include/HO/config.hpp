@@ -19,7 +19,7 @@ inline TweakableFloat playerHitbox{20.0f};
 inline TweakableFloat playerVelocity{0.75f};
 inline TweakableFloat bulletVelocity{1.3f};
 inline TweakableFloat bulletHitboxWidth{15.0f};
-inline TweakableFloat bulletHitboxHeight{30.0f};
+inline TweakableFloat bulletHitboxHeight{55.0f};
 inline TweakableFlag debugView{false};
 }; // namespace Config
 }; // namespace HO
