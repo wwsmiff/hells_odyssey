@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
       elapsedTime = std::chrono::duration<float, std::milli>{0};
       frame = 0;
     }
-    // std::cout << fps << std::endl;
+
     start = current;
   }
 
