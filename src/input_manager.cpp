@@ -16,12 +16,18 @@ InputManager::InputManager()
 
 void InputManager::beginNewFrame()
 {
+  SDL_GetMouseState(&(this->mousePosition.x), &(this->mousePosition.y));
+
+  this->gameControllerAxis.x = SDL_GameControllerGetAxis(
+      this->mPrimaryGameController.get(), SDL_CONTROLLER_AXIS_LEFTX);
+
+  this->gameControllerAxis.y = SDL_GameControllerGetAxis(
+      this->mPrimaryGameController.get(), SDL_CONTROLLER_AXIS_LEFTY);
+
   this->mPressedKeys.clear();
   this->mReleasedKeys.clear();
   this->mPressedButtons.clear();
   this->mReleasedButtons.clear();
-
-  SDL_GetMouseState(&(this->mousePosition.x), &(this->mousePosition.y));
 
   while (SDL_PollEvent(&(this->mEvent)))
   {
@@ -34,71 +40,27 @@ void InputManager::beginNewFrame()
       }
     }
 
-    if (this->mEvent.type == SDL_KEYDOWN)
+    switch (this->mEvent.type)
     {
+    case SDL_KEYDOWN:
       this->mPressedKeys.insert(this->mEvent.key.keysym.sym);
       this->mHeldKeys.insert(this->mEvent.key.keysym.sym);
-    }
-    if (this->mEvent.type == SDL_KEYUP)
-    {
+      break;
+    case SDL_KEYUP:
       this->mReleasedKeys.insert(this->mEvent.key.keysym.sym);
       this->mHeldKeys.erase(this->mEvent.key.keysym.sym);
-    }
+      break;
 
-    if (this->mEvent.type == SDL_CONTROLLERBUTTONDOWN)
-    {
+    case SDL_CONTROLLERBUTTONDOWN:
       this->mPressedButtons.insert(this->mEvent.cbutton.button);
       this->mHeldButtons.insert(this->mEvent.cbutton.button);
-    }
-    if (this->mEvent.type == SDL_CONTROLLERBUTTONUP)
-    {
+      break;
+    case SDL_CONTROLLERBUTTONUP:
       this->mReleasedButtons.insert(this->mEvent.cbutton.button);
       this->mHeldButtons.erase(this->mEvent.cbutton.button);
-    }
-
-    if (this->mEvent.type == SDL_CONTROLLERAXISMOTION)
-    {
-      if (SDL_GameControllerGetAxis(this->mPrimaryGameController.get(),
-                                    SDL_CONTROLLER_AXIS_LEFTX) <
-          -HO::Config::gameController_deadzone_v)
-      {
-        this->mGameControllerAxis[JOYSTICK_RIGHT] = false;
-        this->mGameControllerAxis[JOYSTICK_LEFT] = true;
-      }
-      else if (SDL_GameControllerGetAxis(this->mPrimaryGameController.get(),
-                                         SDL_CONTROLLER_AXIS_LEFTX) >
-               HO::Config::gameController_deadzone_v)
-      {
-        this->mGameControllerAxis[JOYSTICK_LEFT] = false;
-        this->mGameControllerAxis[JOYSTICK_RIGHT] = true;
-      }
-      else
-      {
-        this->mGameControllerAxis[JOYSTICK_RIGHT] = false;
-        this->mGameControllerAxis[JOYSTICK_LEFT] = false;
-      }
-
-      if (SDL_GameControllerGetAxis(this->mPrimaryGameController.get(),
-                                    SDL_CONTROLLER_AXIS_LEFTY) <
-          -HO::Config::gameController_deadzone_v)
-      {
-        // printf("UP\n");
-        this->mGameControllerAxis[JOYSTICK_DOWN] = false;
-        this->mGameControllerAxis[JOYSTICK_UP] = true;
-      }
-      else if (SDL_GameControllerGetAxis(this->mPrimaryGameController.get(),
-                                         SDL_CONTROLLER_AXIS_LEFTY) >
-               HO::Config::gameController_deadzone_v)
-      {
-        // printf("DOWN\n");
-        this->mGameControllerAxis[JOYSTICK_UP] = false;
-        this->mGameControllerAxis[JOYSTICK_DOWN] = true;
-      }
-      else
-      {
-        this->mGameControllerAxis[JOYSTICK_UP] = false;
-        this->mGameControllerAxis[JOYSTICK_DOWN] = false;
-      }
+      break;
+    default:
+      break;
     }
   }
 }
@@ -151,14 +113,6 @@ bool InputManager::gameControllerAxisUp() const
 bool InputManager::gameControllerAxisDown() const
 {
   return this->mGameControllerAxis.at(JOYSTICK_DOWN);
-}
-
-bool InputManager::gameControllerAxisNone() const
-{
-  return (!this->mGameControllerAxis.at(JOYSTICK_DOWN) &&
-          !this->mGameControllerAxis.at(JOYSTICK_UP) &&
-          !this->mGameControllerAxis.at(JOYSTICK_LEFT) &&
-          !this->mGameControllerAxis.at(JOYSTICK_RIGHT));
 }
 
 uint32_t InputManager::gameControllersConnected() const

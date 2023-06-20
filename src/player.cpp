@@ -62,8 +62,8 @@ void Player::move(const Vec2<float> &offset)
 void Player::handleEvents(const InputManager &inputManager)
 {
   if (inputManager.isKeyHeld(SDLK_d) ||
-      inputManager.wasButtonPressed(SDL_CONTROLLER_BUTTON_DPAD_RIGHT) ||
-      inputManager.gameControllerAxisRight())
+      inputManager.isButtonHeld(SDL_CONTROLLER_BUTTON_DPAD_RIGHT) ||
+      (inputManager.gameControllerAxis.x > Config::gameController_deadzone_v))
   {
     this->mPlayerLeft = false;
     this->mPlayerRight = true;
@@ -71,24 +71,24 @@ void Player::handleEvents(const InputManager &inputManager)
     this->mPlayerDirection.x = 1;
   }
   if (inputManager.isKeyHeld(SDLK_a) ||
-      inputManager.wasButtonPressed(SDL_CONTROLLER_BUTTON_DPAD_LEFT) ||
-      inputManager.gameControllerAxisLeft())
+      inputManager.isButtonHeld(SDL_CONTROLLER_BUTTON_DPAD_LEFT) ||
+      (inputManager.gameControllerAxis.x < -Config::gameController_deadzone_v))
   {
     this->mPlayerRight = false;
     this->mPlayerLeft = true;
     this->mPlayerDirection.x = -1;
   }
   if (inputManager.isKeyHeld(SDLK_w) ||
-      inputManager.wasButtonPressed(SDL_CONTROLLER_BUTTON_DPAD_UP) ||
-      inputManager.gameControllerAxisUp())
+      inputManager.isButtonHeld(SDL_CONTROLLER_BUTTON_DPAD_UP) ||
+      (inputManager.gameControllerAxis.y < -Config::gameController_deadzone_v))
   {
     this->mPlayerDown = false;
     this->mPlayerUp = true;
     this->mPlayerDirection.y = -1;
   }
   if (inputManager.isKeyHeld(SDLK_s) ||
-      inputManager.wasButtonPressed(SDL_CONTROLLER_BUTTON_DPAD_DOWN) ||
-      inputManager.gameControllerAxisDown())
+      inputManager.isButtonHeld(SDL_CONTROLLER_BUTTON_DPAD_DOWN) ||
+      (inputManager.gameControllerAxis.y > Config::gameController_deadzone_v))
   {
     this->mPlayerUp = false;
     this->mPlayerDown = true;
@@ -123,22 +123,23 @@ void Player::handleEvents(const InputManager &inputManager)
       this->mElapsedTime = 0;
     }
   }
+
   if (inputManager.wasKeyReleased(SDLK_d) ||
       inputManager.wasButtonReleased(SDL_CONTROLLER_BUTTON_DPAD_RIGHT) ||
-      !inputManager.gameControllerAxisRight())
+      !(inputManager.gameControllerAxis.x > Config::gameController_deadzone_v))
     this->mPlayerRight = false;
   if (inputManager.wasKeyReleased(SDLK_a) ||
       inputManager.wasButtonReleased(SDL_CONTROLLER_BUTTON_DPAD_LEFT) ||
-      !inputManager.gameControllerAxisLeft())
+      !(inputManager.gameControllerAxis.x < -Config::gameController_deadzone_v))
     this->mPlayerLeft = false;
 
   if (inputManager.wasKeyReleased(SDLK_w) ||
       inputManager.wasButtonReleased(SDL_CONTROLLER_BUTTON_DPAD_UP) ||
-      !inputManager.gameControllerAxisUp())
+      !(inputManager.gameControllerAxis.y < -Config::gameController_deadzone_v))
     this->mPlayerUp = false;
   if (inputManager.wasKeyReleased(SDLK_s) ||
       inputManager.wasButtonReleased(SDL_CONTROLLER_BUTTON_DPAD_DOWN) ||
-      !inputManager.gameControllerAxisDown())
+      !(inputManager.gameControllerAxis.y > Config::gameController_deadzone_v))
     this->mPlayerDown = false;
 
   if ((inputManager.wasKeyReleased(SDLK_a) &&
@@ -199,8 +200,8 @@ void Player::update(float delta)
           0, delta * this->mPlayerDirection.y * Config::playerVelocity});
 
       this->mBullets.at(this->mBulletIndex)
-          .move(Vec2<float>{0, delta * this->mPlayerDirection.y *
-                                   (HO::Config::playerVelocity - 0.3f)});
+          .move(
+              Vec2<float>{0, delta * -1 * (HO::Config::playerVelocity - 0.3f)});
     }
   }
   if (this->mPlayerDown)

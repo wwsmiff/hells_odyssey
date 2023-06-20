@@ -43,7 +43,6 @@ public:
   bool gameControllerAxisLeft() const;
   bool gameControllerAxisUp() const;
   bool gameControllerAxisDown() const;
-  bool gameControllerAxisNone() const;
 
   HO::Vec2<int32_t> gameControllerAxis;
   HO::Vec2<int32_t> mousePosition;
