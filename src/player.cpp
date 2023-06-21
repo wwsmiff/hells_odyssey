@@ -4,20 +4,22 @@
 #include "HO/rgba.hpp"
 #include <SDL.h>
 #include <chrono>
+#include <functional>
 #include <iostream>
+#include <unordered_map>
 
 namespace HO
 {
 Player::Player(const Vec2<float> &position, const Vec2<float> &size)
-    : Entity(position, size), mBullets(200),
-      mLeftThruster{50,
+    : Entity(position, size),
+      mLeftThruster{25,
                     Vec2<float>{(this->mPosition.x + 58),
                                 (this->mPosition.y + this->mSize.y - 32)},
                     Vec2<float>{-1.0f, 1.0f},
                     Vec2<float>{0.0f, 4.0f},
                     25.0f,
                     Rgba{200, 200, 200, 255}},
-      mRightThruster{50,
+      mRightThruster{25,
                      Vec2<float>{(this->mPosition.x + this->mSize.x - 70),
                                  (this->mPosition.y + this->mSize.y - 32)},
                      Vec2<float>{-1.0f, 1.0f},
@@ -25,11 +27,13 @@ Player::Player(const Vec2<float> &position, const Vec2<float> &size)
                      25.0f,
                      Rgba{200, 200, 200, 255}}
 {
-  for (auto &bullet : this->mBullets)
-    bullet =
-        Bullet{DOUBLE, Vec2<float>{((this->mPosition.x + (this->mSize.x / 2)) -
-                                    (Config::bulletHitbox / 2)),
-                                   position.y}};
+  for (size_t i = 0; i < 200; ++i)
+  {
+    this->mBullets.emplace_back(
+        DOUBLE, Vec2<float>{((this->mPosition.x + (this->mSize.x / 2)) -
+                             (Config::bulletHitboxWidth / 2)),
+                            position.y + 50});
+  }
 }
 
 void Player::move(const Vec2<float> &offset)
@@ -48,7 +52,7 @@ void Player::move(const Vec2<float> &offset)
   for (auto &bullet : this->mBullets)
     bullet.setOrigin(Vec2<float>{
         ((this->mPosition.x + (this->mSize.x / 2)) - (bullet.getSize().x / 2)),
-        this->mPosition.y});
+        this->mPosition.y + 50});
 
   mLeftThruster.setOrigin(Vec2<float>{
       (this->mPosition.x + 58), (this->mPosition.y + this->mSize.y - 32)});
@@ -57,37 +61,49 @@ void Player::move(const Vec2<float> &offset)
                   (this->mPosition.y + this->mSize.y - 32)});
 }
 
-void Player::handleEvents(const InputManager &inputManager)
+void Player::handleEvents(InputManager &inputManager)
 {
-  if (inputManager.wasKeyPressed(SDLK_d))
+  static bool sGamepad{true};
+
+  if (inputManager.isKeyHeld(SDLK_d) ||
+      inputManager.isButtonHeld(SDL_CONTROLLER_BUTTON_DPAD_RIGHT) ||
+      (sGamepad &&
+       (inputManager.gameControllerAxis.x > Config::gameController_deadzone_v)))
   {
     this->mPlayerLeft = false;
     this->mPlayerRight = true;
 
     this->mPlayerDirection.x = 1;
   }
-  if (inputManager.wasKeyPressed(SDLK_a))
+  if (inputManager.isKeyHeld(SDLK_a) ||
+      inputManager.isButtonHeld(SDL_CONTROLLER_BUTTON_DPAD_LEFT) ||
+      (sGamepad && (inputManager.gameControllerAxis.x <
+                    -Config::gameController_deadzone_v)))
   {
     this->mPlayerRight = false;
     this->mPlayerLeft = true;
     this->mPlayerDirection.x = -1;
   }
-  if (inputManager.wasKeyPressed(SDLK_w))
+  if (inputManager.isKeyHeld(SDLK_w) ||
+      inputManager.isButtonHeld(SDL_CONTROLLER_BUTTON_DPAD_UP) ||
+      (inputManager.gameControllerAxis.y < -Config::gameController_deadzone_v))
   {
     this->mPlayerDown = false;
     this->mPlayerUp = true;
     this->mPlayerDirection.y = -1;
   }
-  if (inputManager.wasKeyPressed(SDLK_s))
+  if (inputManager.isKeyHeld(SDLK_s) ||
+      inputManager.isButtonHeld(SDL_CONTROLLER_BUTTON_DPAD_DOWN) ||
+      (inputManager.gameControllerAxis.y > Config::gameController_deadzone_v))
   {
     this->mPlayerUp = false;
     this->mPlayerDown = true;
     this->mPlayerDirection.y = 1;
   }
 
-  if (inputManager.wasKeyPressed(SDLK_SPACE))
+  if (inputManager.wasKeyPressed(SDLK_SPACE) ||
+      inputManager.wasButtonPressed(SDL_CONTROLLER_BUTTON_X))
   {
-
     for (size_t i = 0; i < this->mBullets.size(); ++i)
     {
       if (!this->mBullets[i].active())
@@ -98,87 +114,61 @@ void Player::handleEvents(const InputManager &inputManager)
       break;
     }
   }
-  if (inputManager.isKeyHeld(SDLK_SPACE))
+
+  if (inputManager.isKeyHeld(SDLK_SPACE) ||
+      inputManager.isButtonHeld(SDL_CONTROLLER_BUTTON_X))
   {
-    static size_t i{0};
-    if (!this->mBullets[i].active())
-      this->mBullets[i].fire();
-    if (this->mElapsedTime > 100)
+    if (!this->mBullets.at(this->mBulletIndex).active())
+      this->mBullets.at(this->mBulletIndex).fire();
+
+    if (this->mElapsedTime > 75)
     {
-      i = (i < this->mBullets.size()) ? i + 1 : 0;
+      this->mBulletIndex = (this->mBulletIndex < this->mBullets.size() - 1)
+                               ? this->mBulletIndex + 1
+                               : 0;
       this->mElapsedTime = 0;
     }
   }
-  if (inputManager.wasKeyReleased(SDLK_d))
+
+  if (!inputManager.isKeyHeld(SDLK_d) &&
+      !inputManager.isButtonHeld(SDL_CONTROLLER_BUTTON_DPAD_RIGHT) &&
+      !(inputManager.gameControllerAxis.x > Config::gameController_deadzone_v))
     this->mPlayerRight = false;
-  if (inputManager.wasKeyReleased(SDLK_a))
+  if (!inputManager.isKeyHeld(SDLK_a) &&
+      !inputManager.isButtonHeld(SDL_CONTROLLER_BUTTON_DPAD_LEFT) &&
+      !(inputManager.gameControllerAxis.x < -Config::gameController_deadzone_v))
     this->mPlayerLeft = false;
 
-  if (inputManager.wasKeyReleased(SDLK_w))
+  if (!inputManager.isKeyHeld(SDLK_w) &&
+      !inputManager.isButtonHeld(SDL_CONTROLLER_BUTTON_DPAD_UP) &&
+      !(inputManager.gameControllerAxis.y < -Config::gameController_deadzone_v))
     this->mPlayerUp = false;
-  if (inputManager.wasKeyReleased(SDLK_s))
+  if (!inputManager.isKeyHeld(SDLK_s) &&
+      !inputManager.isButtonHeld(SDL_CONTROLLER_BUTTON_DPAD_DOWN) &&
+      !(inputManager.gameControllerAxis.y > Config::gameController_deadzone_v))
     this->mPlayerDown = false;
 
-  if (inputManager.wasKeyReleased(SDLK_a) &&
-      inputManager.wasKeyReleased(SDLK_d))
+  if ((inputManager.wasKeyReleased(SDLK_a) &&
+       inputManager.wasKeyReleased(SDLK_d)) ||
+      (inputManager.wasButtonReleased(SDL_CONTROLLER_BUTTON_DPAD_LEFT) &&
+       inputManager.wasButtonReleased(SDL_CONTROLLER_BUTTON_DPAD_RIGHT)))
     this->mPlayerDirection.x = 0;
 
-  if (inputManager.wasKeyReleased(SDLK_w) &&
-      inputManager.wasKeyReleased(SDLK_s))
+  if ((inputManager.wasKeyReleased(SDLK_w) &&
+       inputManager.wasKeyReleased(SDLK_s)) ||
+      (inputManager.wasButtonReleased(SDL_CONTROLLER_BUTTON_DPAD_UP) &&
+       inputManager.wasButtonReleased(SDL_CONTROLLER_BUTTON_DPAD_DOWN)))
     this->mPlayerDirection.y = 0;
-
-  /* Joystick support */
-  if (inputManager.joysticksConnected() > 0)
-  {
-    if (inputManager.eventOccurred(SDL_JOYAXISMOTION))
-    {
-      if (inputManager.joystickAxisUp())
-      {
-        this->mPlayerDown = false;
-        this->mPlayerUp = true;
-        this->mPlayerDirection.y = -1;
-      }
-      else if (inputManager.joystickAxisDown())
-      {
-        this->mPlayerUp = false;
-        this->mPlayerDown = true;
-        this->mPlayerDirection.y = 1;
-      }
-      else
-      {
-        this->mPlayerUp = false;
-        this->mPlayerDown = false;
-        this->mPlayerDirection.y = 0;
-      }
-
-      if (inputManager.joystickAxisLeft())
-      {
-        this->mPlayerRight = false;
-        this->mPlayerLeft = true;
-        this->mPlayerDirection.x = -1;
-      }
-      else if (inputManager.joystickAxisRight())
-      {
-        this->mPlayerLeft = false;
-        this->mPlayerRight = true;
-        this->mPlayerDirection.x = 1;
-      }
-      else
-      {
-        this->mPlayerLeft = false;
-        this->mPlayerRight = false;
-        this->mPlayerDirection.x = 0;
-      }
-    }
-  }
 }
 
 void Player::update(float delta)
 {
   this->mElapsedTime += delta;
 
-  this->mPlayerDirection.normalize();
+  this->mLeftThruster.update(delta);
+  this->mRightThruster.update(delta);
 
+  this->mPlayerDirection.normalize();
   if (this->mPlayerLeft)
   {
     if ((this->mPosition.x - Config::padding_v) > this->mHorizontalBounds.x)
@@ -214,6 +204,10 @@ void Player::update(float delta)
           0, delta * this->mPlayerDirection.y * Config::playerVelocity});
       this->mLeftThruster.moveParticles(Vec2<float>{
           0, delta * this->mPlayerDirection.y * Config::playerVelocity});
+
+      this->mBullets.at(this->mBulletIndex)
+          .move(
+              Vec2<float>{0, delta * -1 * (HO::Config::playerVelocity - 0.3f)});
     }
   }
   if (this->mPlayerDown)
@@ -233,9 +227,6 @@ void Player::update(float delta)
 
   for (auto &bullet : this->mBullets)
     bullet.update(delta);
-
-  this->mLeftThruster.update(delta);
-  this->mRightThruster.update(delta);
 }
 
 void Player::render(SDL_Renderer *renderer)

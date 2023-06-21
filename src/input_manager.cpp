@@ -5,93 +5,63 @@
 
 namespace HO
 {
+InputManager::InputManager()
+{
+  this->mPrimaryGameController =
+      std::unique_ptr<SDL_GameController, Deleters::SdlDeleter>{
+          SDL_GameControllerOpen(0)};
+
+  SDL_JoystickEventState(SDL_ENABLE);
+}
+
 void InputManager::beginNewFrame()
 {
-  this->mPressedKeys.clear();
-  this->mReleasedKeys.clear();
-
   SDL_GetMouseState(&(this->mousePosition.x), &(this->mousePosition.y));
 
-  this->mJoysticksConnected = 0;
-  if (!this->mPrimaryJoystick)
-  {
-    SDL_JoystickEventState(SDL_DISABLE);
-    this->mPrimaryJoystick =
-        std::unique_ptr<SDL_Joystick, Deleters::SdlDeleter>{
-            SDL_JoystickOpen(mJoysticksConnected)};
-  }
-  else if (this->mPrimaryJoystick)
-  {
-    SDL_JoystickEventState(SDL_ENABLE);
-    this->mJoysticksConnected++;
-  }
+  this->gameControllerAxis.x = SDL_GameControllerGetAxis(
+      this->mPrimaryGameController.get(), SDL_CONTROLLER_AXIS_LEFTX);
 
-  if (SDL_PollEvent(&(this->mEvent)))
+  this->gameControllerAxis.y = SDL_GameControllerGetAxis(
+      this->mPrimaryGameController.get(), SDL_CONTROLLER_AXIS_LEFTY);
+
+  this->mPressedKeys.clear();
+  this->mReleasedKeys.clear();
+  this->mPressedButtons.clear();
+  this->mReleasedButtons.clear();
+
+  while (SDL_PollEvent(&(this->mEvent)))
   {
-    if (this->mEvent.type == SDL_KEYDOWN)
+    if (auto it = this->callbacks.find(mEvent.type);
+        it != this->callbacks.end())
+      it->second();
+
+    switch (this->mEvent.type)
     {
+    case SDL_KEYDOWN:
       this->mPressedKeys.insert(this->mEvent.key.keysym.sym);
       this->mHeldKeys.insert(this->mEvent.key.keysym.sym);
-    }
-    else if (this->mEvent.type == SDL_KEYUP)
-    {
+      break;
+    case SDL_KEYUP:
       this->mReleasedKeys.insert(this->mEvent.key.keysym.sym);
-      auto it = this->mHeldKeys.find(this->mEvent.key.keysym.sym);
       this->mHeldKeys.erase(this->mEvent.key.keysym.sym);
-    }
+      break;
 
-    if (this->mPrimaryJoystick)
-    {
-      if (this->mEvent.type == SDL_JOYAXISMOTION)
-      {
-        if (this->mEvent.jaxis.which == 0) /* First Joystick */
-        {
-          if (this->mEvent.jaxis.axis == 0) /* Horizontal axis */
-          {
-            if (this->mEvent.jaxis.value < -HO::Config::joystick_deadzone_v)
-            {
-              this->mJoystickAxis[JOYSTICK_RIGHT] = false;
-              this->mJoystickAxis[JOYSTICK_LEFT] = true;
-            }
-            else if (this->mEvent.jaxis.value > HO::Config::joystick_deadzone_v)
-            {
-              this->mJoystickAxis[JOYSTICK_LEFT] = false;
-              this->mJoystickAxis[JOYSTICK_RIGHT] = true;
-            }
-            else
-            {
-              this->mJoystickAxis[JOYSTICK_RIGHT] = false;
-              this->mJoystickAxis[JOYSTICK_LEFT] = false;
-            }
-          }
-
-          else if (this->mEvent.jaxis.axis == 1) /* Vertical axis */
-          {
-            if (this->mEvent.jaxis.value < -HO::Config::joystick_deadzone_v)
-            {
-              this->mJoystickAxis[JOYSTICK_DOWN] = false;
-              this->mJoystickAxis[JOYSTICK_UP] = true;
-            }
-            else if (this->mEvent.jaxis.value > HO::Config::joystick_deadzone_v)
-            {
-              this->mJoystickAxis[JOYSTICK_UP] = false;
-              this->mJoystickAxis[JOYSTICK_DOWN] = true;
-            }
-            else
-            {
-              this->mJoystickAxis[JOYSTICK_UP] = false;
-              this->mJoystickAxis[JOYSTICK_DOWN] = false;
-            }
-          }
-        }
-      }
+    case SDL_CONTROLLERBUTTONDOWN:
+      this->mPressedButtons.insert(this->mEvent.cbutton.button);
+      this->mHeldButtons.insert(this->mEvent.cbutton.button);
+      break;
+    case SDL_CONTROLLERBUTTONUP:
+      this->mReleasedButtons.insert(this->mEvent.cbutton.button);
+      this->mHeldButtons.erase(this->mEvent.cbutton.button);
+      break;
+    default:
+      break;
     }
   }
 }
 
 bool InputManager::wasKeyPressed(SDL_Keycode key) const
 {
-
   return this->mPressedKeys.contains(key);
 }
 bool InputManager::wasKeyReleased(SDL_Keycode key) const
@@ -104,39 +74,44 @@ bool InputManager::isKeyHeld(SDL_Keycode key) const
   return this->mHeldKeys.contains(key);
 }
 
+bool InputManager::wasButtonPressed(uint8_t key) const
+{
+  return this->mPressedButtons.contains(key);
+}
+bool InputManager::wasButtonReleased(uint8_t key) const
+{
+
+  return this->mReleasedButtons.contains(key);
+}
+bool InputManager::isButtonHeld(uint8_t key) const
+{
+  return this->mHeldButtons.contains(key);
+}
+
 bool InputManager::eventOccurred(SDL_EventType type) const
 {
   return (this->mEvent.type == type);
 }
 
-bool InputManager::joystickAxisRight() const
+bool InputManager::gameControllerAxisRight() const
 {
-  return this->mJoystickAxis.at(JOYSTICK_RIGHT);
+  return this->mGameControllerAxis.at(JOYSTICK_RIGHT);
 }
-bool InputManager::joystickAxisLeft() const
+bool InputManager::gameControllerAxisLeft() const
 {
-  return this->mJoystickAxis.at(JOYSTICK_LEFT);
+  return this->mGameControllerAxis.at(JOYSTICK_LEFT);
 }
-bool InputManager::joystickAxisUp() const
+bool InputManager::gameControllerAxisUp() const
 {
-  return this->mJoystickAxis.at(JOYSTICK_UP);
+  return this->mGameControllerAxis.at(JOYSTICK_UP);
 }
-bool InputManager::joystickAxisDown() const
+bool InputManager::gameControllerAxisDown() const
 {
-  return this->mJoystickAxis.at(JOYSTICK_DOWN);
-}
-
-bool InputManager::joystickAxisNone() const
-{
-  return (!this->mJoystickAxis.at(JOYSTICK_DOWN) &&
-          !this->mJoystickAxis.at(JOYSTICK_UP) &&
-          !this->mJoystickAxis.at(JOYSTICK_LEFT) &&
-          !this->mJoystickAxis.at(JOYSTICK_RIGHT));
+  return this->mGameControllerAxis.at(JOYSTICK_DOWN);
 }
 
-uint32_t InputManager::joysticksConnected() const
+uint32_t InputManager::gameControllersConnected() const
 {
   return this->mJoysticksConnected;
 }
-
 }; // namespace HO

@@ -11,7 +11,7 @@ namespace HO
 {
 enum BulletType : uint8_t
 {
-  CLASSIC,
+  CLASSIC = 0,
   DOUBLE,
 };
 
@@ -21,6 +21,7 @@ public:
   Bullet();
   Bullet(uint8_t type, const Vec2<float> &origin);
   void update(float delta);
+  void move(Vec2<float> offset);
   bool active() const;
   void active(bool state);
   void render(SDL_Renderer *renderer);
@@ -31,9 +32,10 @@ public:
 
   Vec2<float> getSize() const;
   Vec2<float> getOrigin() const;
+  Vec2<float> getPosition() const;
 
 protected:
-  uint8_t mType;
+  uint8_t mType{};
   bool mActive{};
   Vec2<float> mOrigin{};
   Vec2<float> mSize{};

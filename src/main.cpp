@@ -5,7 +5,8 @@
 
 int main(int argc, char *argv[])
 {
-  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK) != 0)
+  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER) !=
+      0)
   {
     std::cout << "Failed to initialize SDL2, " << SDL_GetError() << std::endl;
     return 1;
@@ -15,11 +16,14 @@ int main(int argc, char *argv[])
   SDL_GetDesktopDisplayMode(0, &primaryDisplay);
 
   constexpr int32_t camera_width_v{800};
-  const int32_t camera_height_v{primaryDisplay.h};
+  // const int32_t camera_height_v{primaryDisplay.h};
 
   HO::Window mainWindow{"Hell's Odyssey",
                         HO::Vec2<int32_t>{primaryDisplay.w, primaryDisplay.h},
                         SDL_WINDOW_FULLSCREEN_DESKTOP};
+
+  // HO::Window mainWindow{"Hell's Odyssey", HO::Vec2<int32_t>{800, 1024},
+  //                       SDL_WINDOW_SHOWN};
   bool running{true};
 
   SDL_Rect gameBackground{0, 0, camera_width_v, 0};
@@ -35,9 +39,9 @@ int main(int argc, char *argv[])
       static_cast<uint32_t>(gameBackground.y),
       static_cast<uint32_t>(gameBackground.y + gameBackground.h)};
 
-  auto fromLeft = [=](float n) { return gameBoundsHorizontal.x + n; };
-  auto fromRight = [=](float n) { return gameBoundsHorizontal.y - n; };
-  auto fromTop = [=](float n) { return gameBoundsVertical.x + n; };
+  // auto fromLeft = [=](float n) { return gameBoundsHorizontal.x + n; };
+  // auto fromRight = [=](float n) { return gameBoundsHorizontal.y - n; };
+  // auto fromTop = [=](float n) { return gameBoundsVertical.x + n; };
   auto fromBottom = [=](float n) { return gameBoundsVertical.y - n; };
 
   HO::Player player{
@@ -59,22 +63,26 @@ int main(int argc, char *argv[])
   player.loadTexture(mainWindow.getRenderer(),
                      "../assets/sprites/player_ship.png");
 
-  auto start{SDL_GetTicks()};
-
   gvdi::Instance instance{};
   if constexpr (enable_debug_v)
     instance = gvdi::Instance{{500, 600}, "Tweaks"};
 
   HO::InputManager windowInput{};
 
+  std::chrono::duration<float, std::milli> elapsedTime{};
+
+  auto start{std::chrono::steady_clock::now()};
+
+  windowInput.callbacks.emplace(SDL_QUIT, [&]() { running = false; });
+
+  auto frame{0};
+  auto fps{0};
   while (running)
   {
-    auto current{SDL_GetTicks()};
-    auto delta{current - start};
+    auto current{std::chrono::steady_clock::now()};
+    auto delta{std::chrono::duration<float, std::milli>(current - start)};
 
     windowInput.beginNewFrame();
-    if (windowInput.eventOccurred(SDL_QUIT))
-      running = false;
 
     player.handleEvents(windowInput);
 
@@ -86,7 +94,7 @@ int main(int argc, char *argv[])
                                      HO::Config::playerBlocksize});
     }
 
-    player.update(static_cast<float>(delta));
+    player.update(delta.count());
 
     mainWindow.clear(HO::Rgba{0x00'00'00'ff});
 
@@ -116,7 +124,24 @@ int main(int argc, char *argv[])
       int32_t playerHitboxInt{static_cast<int32_t>(HO::Config::playerHitbox)};
       ImGui::SliderInt("Hitbox size", &playerHitboxInt, 0, 1024);
       HO::Config::playerHitbox = static_cast<uint32_t>(playerHitboxInt);
+
+      ImGui::SliderFloat("Bullet velocity", &HO::Config::bulletVelocity, 0.0f,
+                         5.0f);
+      ImGui::SliderFloat("Bullet width", &HO::Config::bulletHitboxWidth, 0.0f,
+                         50.0f);
+      ImGui::SliderFloat("Bullet height", &HO::Config::bulletHitboxHeight, 0.0f,
+                         100.0f);
+
       ImGui::End();
+    }
+
+    elapsedTime += delta;
+    frame++;
+    if (elapsedTime > std::chrono::seconds(1))
+    {
+      fps = frame;
+      elapsedTime = std::chrono::duration<float, std::milli>{0};
+      frame = 0;
     }
 
     start = current;

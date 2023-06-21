@@ -1,6 +1,7 @@
 #include "HO/bullet.hpp"
 #include "HO/config.hpp"
 #include <SDL.h>
+#include <iostream>
 
 namespace HO
 {
@@ -8,12 +9,12 @@ namespace HO
 Bullet::Bullet() {}
 
 Bullet::Bullet(uint8_t type, const Vec2<float> &origin)
-    : mType{type}, mActive{false}, mOrigin{origin}, mHitboxes{}
+    : mType{type}, mActive{false}, mOrigin{origin}, mTexture{}, mHitboxes{},
+      mColor{}
 {
   if (this->mType == CLASSIC)
   {
-    this->mHitboxes.clear();
-    this->mSize = {Config::bulletHitbox, Config::bulletHitbox};
+    this->mSize = {Config::bulletHitboxWidth, Config::bulletHitboxHeight};
     this->mColor = {0, 255, 255, 255};
     this->mHitboxes.push_back(SDL_Rect{static_cast<int32_t>(this->mOrigin.x),
                                        static_cast<int32_t>(this->mOrigin.y),
@@ -22,35 +23,65 @@ Bullet::Bullet(uint8_t type, const Vec2<float> &origin)
   }
   else if (this->mType == DOUBLE)
   {
-    this->mHitboxes.clear();
-    this->mSize = {Config::bulletHitbox, Config::bulletHitbox};
+    this->mSize = {Config::bulletHitboxWidth, Config::bulletHitboxHeight};
     this->mColor = {0, 60, 255, 255};
-    this->mHitboxes.push_back(
-        SDL_Rect{static_cast<int32_t>((this->mOrigin.x - (this->mSize.x * 2))),
-                 static_cast<int32_t>(this->mOrigin.y),
-                 static_cast<int32_t>(this->mSize.x),
-                 static_cast<int32_t>(this->mSize.y)});
-    this->mHitboxes.push_back(
-        SDL_Rect{static_cast<int32_t>((this->mOrigin.x + (this->mSize.x * 2))),
-                 static_cast<int32_t>(this->mOrigin.y),
-                 static_cast<int32_t>(this->mSize.x),
-                 static_cast<int32_t>(this->mSize.y)});
+    this->mHitboxes.push_back(SDL_Rect{
+        static_cast<int32_t>((this->mOrigin.x - (this->mSize.x * 1.5))),
+        static_cast<int32_t>(this->mOrigin.y),
+        static_cast<int32_t>(this->mSize.x),
+        static_cast<int32_t>(this->mSize.y)});
+    this->mHitboxes.push_back(SDL_Rect{
+        static_cast<int32_t>((this->mOrigin.x + (this->mSize.x * 1.5))),
+        static_cast<int32_t>(this->mOrigin.y),
+        static_cast<int32_t>(this->mSize.x),
+        static_cast<int32_t>(this->mSize.y)});
   }
   /* TODO: Load texture */
 }
 
 void Bullet::update(float delta)
 {
-  if (this->mActive)
+  if constexpr (enable_debug_v)
   {
     for (auto &hitbox : this->mHitboxes)
     {
-      if (hitbox.y > 5)
-        hitbox.y -= static_cast<int32_t>((delta * Config::bulletVelocity));
+      hitbox.w = HO::Config::bulletHitboxWidth;
+      hitbox.h = HO::Config::bulletHitboxHeight;
+    }
+  }
+
+  if (this->mActive)
+  {
+    if (this->mType == CLASSIC)
+    {
+      if (this->mHitboxes[0].y > 5)
+        this->mHitboxes[0].y -=
+            static_cast<int32_t>((delta * Config::bulletVelocity));
       else
       {
-        hitbox.x = static_cast<int32_t>(this->mOrigin.x);
-        hitbox.y = static_cast<int32_t>(this->mOrigin.y);
+        this->mHitboxes[0].x = static_cast<int32_t>(this->mOrigin.x);
+        this->mHitboxes[0].y = static_cast<int32_t>(this->mOrigin.y);
+        this->active(false);
+      }
+    }
+
+    else if (this->mType == DOUBLE)
+    {
+      if (this->mHitboxes[0].y > 5 && this->mHitboxes[1].y > 5)
+      {
+        this->mHitboxes[0].y -=
+            static_cast<int32_t>((delta * Config::bulletVelocity));
+        this->mHitboxes[1].y -=
+            static_cast<int32_t>((delta * Config::bulletVelocity));
+      }
+      else
+      {
+        this->mHitboxes[0].x =
+            static_cast<int32_t>(this->mOrigin.x - (this->mSize.x * 1.5));
+        this->mHitboxes[0].y = static_cast<int32_t>(this->mOrigin.y);
+        this->mHitboxes[1].x =
+            static_cast<int32_t>(this->mOrigin.x + (this->mSize.x * 1.5));
+        this->mHitboxes[1].y = static_cast<int32_t>(this->mOrigin.y);
         this->active(false);
       }
     }
@@ -62,10 +93,10 @@ void Bullet::update(float delta)
       this->mHitboxes[0].x = this->mOrigin.x;
       this->mHitboxes[0].y = this->mOrigin.y;
     }
-    if (this->mType == DOUBLE)
+    else if (this->mType == DOUBLE)
     {
-      this->mHitboxes[0].x = this->mOrigin.x - (Config::bulletHitbox * 2);
-      this->mHitboxes[1].x = this->mOrigin.x + (Config::bulletHitbox * 2);
+      this->mHitboxes[0].x = this->mOrigin.x - (this->mSize.x * 1.5);
+      this->mHitboxes[1].x = this->mOrigin.x + (this->mSize.x * 1.5);
       this->mHitboxes[0].y = this->mHitboxes[1].y = this->mOrigin.y;
     }
   }
@@ -81,25 +112,68 @@ void Bullet::fire()
 }
 void Bullet::render(SDL_Renderer *renderer)
 {
+  if (!this->mTexture.get())
+    this->mTexture.load(renderer, "../assets/sprites/player_bullet_2.png");
+
   if (Config::debugView)
   {
     SDL_SetRenderDrawColor(renderer, this->mColor.r, this->mColor.g,
                            this->mColor.b, this->mColor.a);
     for (const auto &hitbox : this->mHitboxes)
       SDL_RenderDrawRect(renderer, &(hitbox));
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    SDL_RenderDrawPoint(renderer, this->mOrigin.x, this->mOrigin.y);
   }
-  if (this->mActive)
+  else
   {
-    for (const auto &hitbox : this->mHitboxes)
+    if (this->mActive)
     {
-      SDL_RenderCopy(renderer, this->mTexture.get(), nullptr, &(hitbox));
+      std::vector<SDL_Vertex> vertices{};
+      std::vector<int32_t> indices{};
+      for (const auto &hitbox : this->mHitboxes)
+      {
+        const size_t offset{vertices.size()};
+        vertices.push_back(SDL_Vertex{
+            {static_cast<float>(hitbox.x),
+             static_cast<float>(hitbox.y) + static_cast<float>(hitbox.h)},
+            {255, 255, 255, this->mColor.a},
+            {0.0f, 1.0f}});
+        vertices.push_back(SDL_Vertex{
+            {static_cast<float>(hitbox.x) + static_cast<float>(hitbox.w),
+             static_cast<float>(hitbox.y + hitbox.h)},
+            {255, 255, 255, this->mColor.a},
+            {1.0f, 1.0f}});
+        vertices.push_back(SDL_Vertex{
+            {static_cast<float>(hitbox.x) + static_cast<float>(hitbox.w),
+             static_cast<float>(hitbox.y)},
+            {255, 255, 255, this->mColor.a},
+            {1.0f, 0.0f}});
+        vertices.push_back(SDL_Vertex{
+            {static_cast<float>(hitbox.x), static_cast<float>(hitbox.y)},
+            {255, 255, 255, this->mColor.a},
+            {0.0f, 0.0f}});
+
+        indices.push_back(offset);
+        indices.push_back(offset + 1);
+        indices.push_back(offset + 2);
+        indices.push_back(offset + 2);
+        indices.push_back(offset + 3);
+        indices.push_back(offset);
+      }
+
+      SDL_RenderGeometry(renderer, mTexture.get(), vertices.data(),
+                         vertices.size(), indices.data(), indices.size());
     }
+  }
+}
+
+void Bullet::move(Vec2<float> offset)
+{
+  for (auto &hitbox : this->mHitboxes)
+  {
+    hitbox.x += static_cast<int32_t>(offset.x);
+    hitbox.y += static_cast<int32_t>(offset.y);
   }
 }
 
 Vec2<float> Bullet::getSize() const { return this->mSize; }
 Vec2<float> Bullet::getOrigin() const { return this->mOrigin; }
-
 }; // namespace HO

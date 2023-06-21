@@ -6,9 +6,11 @@
 #include <SDL.h>
 #include <array>
 #include <cstdint>
+#include <functional>
 #include <memory>
-#include <set>
 #include <string>
+#include <unordered_map>
+#include <unordered_set>
 
 enum JoystickAxis : uint8_t
 {
@@ -23,31 +25,40 @@ namespace HO
 class InputManager
 {
 public:
+  InputManager();
+
   void beginNewFrame();
   void update();
   bool wasKeyPressed(SDL_Keycode key) const;
   bool wasKeyReleased(SDL_Keycode key) const;
   bool isKeyHeld(SDL_Keycode key) const;
+
+  bool wasButtonPressed(uint8_t key) const;
+  bool wasButtonReleased(uint8_t key) const;
+  bool isButtonHeld(uint8_t key) const;
+
   bool eventOccurred(SDL_EventType type) const;
-  uint32_t joysticksConnected() const;
-  bool joystickAxisRight() const;
-  bool joystickAxisLeft() const;
-  bool joystickAxisUp() const;
-  bool joystickAxisDown() const;
-  bool joystickAxisNone() const;
+  uint32_t gameControllersConnected() const;
+  bool gameControllerAxisRight() const;
+  bool gameControllerAxisLeft() const;
+  bool gameControllerAxisUp() const;
+  bool gameControllerAxisDown() const;
 
-  // bool joystickButtonPressed(SDL_JoyButtonEvent) const;
-
-  HO::Vec2<int32_t> joystickAxis;
+  HO::Vec2<int32_t> gameControllerAxis;
   HO::Vec2<int32_t> mousePosition;
+  std::unordered_map<uint32_t, std::function<void(void)>> callbacks;
 
 protected:
   SDL_Event mEvent;
-  std::unique_ptr<SDL_Joystick, Deleters::SdlDeleter> mPrimaryJoystick{};
-  std::set<SDL_Keycode> mHeldKeys{};
-  std::set<SDL_Keycode> mPressedKeys{};
-  std::set<SDL_Keycode> mReleasedKeys{};
-  std::array<bool, 4> mJoystickAxis{};
+  std::unique_ptr<SDL_GameController, Deleters::SdlDeleter>
+      mPrimaryGameController{};
+  std::unordered_set<SDL_Keycode> mHeldKeys{};
+  std::unordered_set<SDL_Keycode> mPressedKeys{};
+  std::unordered_set<SDL_Keycode> mReleasedKeys{};
+  std::unordered_set<uint8_t> mHeldButtons{};
+  std::unordered_set<uint8_t> mPressedButtons{};
+  std::unordered_set<uint8_t> mReleasedButtons{};
+  std::array<bool, 4> mGameControllerAxis{};
   uint32_t mJoysticksConnected{};
 };
 }; // namespace HO
