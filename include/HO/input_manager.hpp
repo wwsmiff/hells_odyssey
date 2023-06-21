@@ -46,7 +46,7 @@ public:
 
   HO::Vec2<int32_t> gameControllerAxis;
   HO::Vec2<int32_t> mousePosition;
-  std::unordered_map<SDL_EventType, std::function<void(void)>> callbacks;
+  std::unordered_map<uint32_t, std::function<void(void)>> callbacks;
 
 protected:
   SDL_Event mEvent;

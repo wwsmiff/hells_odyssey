@@ -17,7 +17,7 @@ public:
 
   void move(const Vec2<float> &offset);
 
-  void handleEvents(const InputManager &inputManager);
+  void handleEvents(InputManager &inputManager);
   void update(float delta);
   void render(SDL_Renderer *renderer);
   void setBounds(const Vec2<uint32_t> &horizontal,

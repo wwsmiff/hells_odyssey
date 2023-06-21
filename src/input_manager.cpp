@@ -31,14 +31,9 @@ void InputManager::beginNewFrame()
 
   while (SDL_PollEvent(&(this->mEvent)))
   {
-    for (const auto &callback : callbacks)
-    {
-      if (this->mEvent.type == callback.first)
-      {
-        if (callback.second)
-          callback.second();
-      }
-    }
+    if (auto it = this->callbacks.find(mEvent.type);
+        it != this->callbacks.end())
+      it->second();
 
     switch (this->mEvent.type)
     {

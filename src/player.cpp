@@ -4,7 +4,9 @@
 #include "HO/rgba.hpp"
 #include <SDL.h>
 #include <chrono>
+#include <functional>
 #include <iostream>
+#include <unordered_map>
 
 namespace HO
 {
@@ -59,10 +61,14 @@ void Player::move(const Vec2<float> &offset)
                   (this->mPosition.y + this->mSize.y - 32)});
 }
 
-void Player::handleEvents(const InputManager &inputManager)
+void Player::handleEvents(InputManager &inputManager)
 {
+  static bool sGamepad{true};
+
   if (inputManager.isKeyHeld(SDLK_d) ||
-      inputManager.isButtonHeld(SDL_CONTROLLER_BUTTON_DPAD_RIGHT))
+      inputManager.isButtonHeld(SDL_CONTROLLER_BUTTON_DPAD_RIGHT) ||
+      (sGamepad &&
+       (inputManager.gameControllerAxis.x > Config::gameController_deadzone_v)))
   {
     this->mPlayerLeft = false;
     this->mPlayerRight = true;
@@ -70,21 +76,25 @@ void Player::handleEvents(const InputManager &inputManager)
     this->mPlayerDirection.x = 1;
   }
   if (inputManager.isKeyHeld(SDLK_a) ||
-      inputManager.isButtonHeld(SDL_CONTROLLER_BUTTON_DPAD_LEFT))
+      inputManager.isButtonHeld(SDL_CONTROLLER_BUTTON_DPAD_LEFT) ||
+      (sGamepad && (inputManager.gameControllerAxis.x <
+                    -Config::gameController_deadzone_v)))
   {
     this->mPlayerRight = false;
     this->mPlayerLeft = true;
     this->mPlayerDirection.x = -1;
   }
   if (inputManager.isKeyHeld(SDLK_w) ||
-      inputManager.isButtonHeld(SDL_CONTROLLER_BUTTON_DPAD_UP))
+      inputManager.isButtonHeld(SDL_CONTROLLER_BUTTON_DPAD_UP) ||
+      (inputManager.gameControllerAxis.y < -Config::gameController_deadzone_v))
   {
     this->mPlayerDown = false;
     this->mPlayerUp = true;
     this->mPlayerDirection.y = -1;
   }
   if (inputManager.isKeyHeld(SDLK_s) ||
-      inputManager.isButtonHeld(SDL_CONTROLLER_BUTTON_DPAD_DOWN))
+      inputManager.isButtonHeld(SDL_CONTROLLER_BUTTON_DPAD_DOWN) ||
+      (inputManager.gameControllerAxis.y > Config::gameController_deadzone_v))
   {
     this->mPlayerUp = false;
     this->mPlayerDown = true;
@@ -120,18 +130,22 @@ void Player::handleEvents(const InputManager &inputManager)
     }
   }
 
-  if (inputManager.wasKeyReleased(SDLK_d) ||
-      inputManager.wasButtonReleased(SDL_CONTROLLER_BUTTON_DPAD_RIGHT))
+  if (!inputManager.isKeyHeld(SDLK_d) &&
+      !inputManager.isButtonHeld(SDL_CONTROLLER_BUTTON_DPAD_RIGHT) &&
+      !(inputManager.gameControllerAxis.x > Config::gameController_deadzone_v))
     this->mPlayerRight = false;
-  if (inputManager.wasKeyReleased(SDLK_a) ||
-      inputManager.wasButtonReleased(SDL_CONTROLLER_BUTTON_DPAD_LEFT))
+  if (!inputManager.isKeyHeld(SDLK_a) &&
+      !inputManager.isButtonHeld(SDL_CONTROLLER_BUTTON_DPAD_LEFT) &&
+      !(inputManager.gameControllerAxis.x < -Config::gameController_deadzone_v))
     this->mPlayerLeft = false;
 
-  if (inputManager.wasKeyReleased(SDLK_w) ||
-      inputManager.wasButtonReleased(SDL_CONTROLLER_BUTTON_DPAD_UP))
+  if (!inputManager.isKeyHeld(SDLK_w) &&
+      !inputManager.isButtonHeld(SDL_CONTROLLER_BUTTON_DPAD_UP) &&
+      !(inputManager.gameControllerAxis.y < -Config::gameController_deadzone_v))
     this->mPlayerUp = false;
-  if (inputManager.wasKeyReleased(SDLK_s) ||
-      inputManager.wasButtonReleased(SDL_CONTROLLER_BUTTON_DPAD_DOWN))
+  if (!inputManager.isKeyHeld(SDLK_s) &&
+      !inputManager.isButtonHeld(SDL_CONTROLLER_BUTTON_DPAD_DOWN) &&
+      !(inputManager.gameControllerAxis.y > Config::gameController_deadzone_v))
     this->mPlayerDown = false;
 
   if ((inputManager.wasKeyReleased(SDLK_a) &&

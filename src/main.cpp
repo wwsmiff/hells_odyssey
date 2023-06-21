@@ -73,9 +73,7 @@ int main(int argc, char *argv[])
 
   auto start{std::chrono::steady_clock::now()};
 
-  windowInput.callbacks.insert(
-      std::make_pair<SDL_EventType, std::function<void(void)>>(
-          SDL_QUIT, [&]() { running = false; }));
+  windowInput.callbacks.emplace(SDL_QUIT, [&]() { running = false; });
 
   auto frame{0};
   auto fps{0};
