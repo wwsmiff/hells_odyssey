@@ -113,7 +113,8 @@ void Bullet::fire()
 void Bullet::render(SDL_Renderer *renderer)
 {
   if (!this->mTexture.get())
-    this->mTexture.load(renderer, "../assets/sprites/player_bullet_2.png");
+    this->mTexture.load(renderer,
+                        "../assets/sprites/bullets/player_bullet_type_1.png");
 
   if (Config::debugView)
   {

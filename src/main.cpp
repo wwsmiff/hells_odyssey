@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
   player.setBounds(gameBoundsHorizontal, gameBoundsVertical);
 
   player.loadTexture(mainWindow.getRenderer(),
-                     "../assets/sprites/player_ship.png");
+                     "../assets/sprites/player/ship.png");
 
   gvdi::Instance instance{};
   if constexpr (enable_debug_v)
