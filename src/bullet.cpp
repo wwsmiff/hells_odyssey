@@ -55,8 +55,7 @@ void Bullet::update(float delta)
     if (this->mType == CLASSIC)
     {
       if (this->mHitboxes[0].y > 5)
-        this->mHitboxes[0].y -=
-            static_cast<int32_t>((delta * Config::bulletVelocity));
+        this->mHitboxes[0].y -= delta * Config::bulletVelocity;
       else
       {
         this->mHitboxes[0].x = static_cast<int32_t>(this->mOrigin.x);
@@ -69,10 +68,8 @@ void Bullet::update(float delta)
     {
       if (this->mHitboxes[0].y > 5 && this->mHitboxes[1].y > 5)
       {
-        this->mHitboxes[0].y -=
-            static_cast<int32_t>((delta * Config::bulletVelocity));
-        this->mHitboxes[1].y -=
-            static_cast<int32_t>((delta * Config::bulletVelocity));
+        this->mHitboxes[0].y -= delta * Config::bulletVelocity;
+        this->mHitboxes[1].y -= delta * Config::bulletVelocity;
       }
       else
       {
