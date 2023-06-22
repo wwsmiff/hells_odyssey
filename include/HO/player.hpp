@@ -10,16 +10,15 @@
 
 namespace HO
 {
-class Player : public Entity
+class Player final : public Entity
 {
 public:
   explicit Player(const Vec2<float> &position, const Vec2<float> &size);
 
-  void move(const Vec2<float> &offset);
-
+  void move(const Vec2<float> &offset) final;
   void handleEvents(InputManager &inputManager);
-  void update(float delta);
-  void render(SDL_Renderer *renderer);
+  void update(float delta) final;
+  void render(SDL_Renderer *renderer) final;
   void setBounds(const Vec2<uint32_t> &horizontal,
                  const Vec2<uint32_t> &vertical);
   void setHorizontalBounds(const Vec2<uint32_t> &horizontal);
