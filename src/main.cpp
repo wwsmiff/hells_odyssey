@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
   //                       SDL_WINDOW_SHOWN};
   bool running{true};
 
-  SDL_Rect gameBackground{0, 0, camera_width_v, 0};
+  SDL_FRect gameBackground{0, 0, camera_width_v, 0};
 
   gameBackground.h = primaryDisplay.h;
   gameBackground.x =
@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
     mainWindow.clear(HO::Rgba{0x00'00'00'ff});
 
     SDL_SetRenderDrawColor(mainWindow.getRenderer(), 16, 16, 16, 255);
-    SDL_RenderFillRect(mainWindow.getRenderer(), &gameBackground);
+    SDL_RenderFillRectF(mainWindow.getRenderer(), &gameBackground);
 
     player.render(mainWindow.getRenderer());
 

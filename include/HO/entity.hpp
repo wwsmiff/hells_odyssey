@@ -30,8 +30,8 @@ public:
 protected:
   Texture mTexture{};
   Vec2<float> mPosition{}, mSize{};
-  SDL_Rect mHitbox{};
-  SDL_Rect mRenderRect{};
+  SDL_FRect mHitbox{};
+  SDL_FRect mRenderRect{};
   Rgba mColor{};
 };
 }; // namespace HO
