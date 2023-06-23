@@ -40,7 +40,7 @@ protected:
   Vec2<float> mOrigin{};
   Vec2<float> mSize{};
   Texture mTexture{};
-  std::vector<SDL_Rect> mHitboxes{};
+  std::vector<SDL_FRect> mHitboxes{};
   HO::Rgba mColor{};
 };
 }; // namespace HO

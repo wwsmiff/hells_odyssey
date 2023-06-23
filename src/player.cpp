@@ -101,27 +101,13 @@ void Player::handleEvents(InputManager &inputManager)
     this->mPlayerDirection.y = 1;
   }
 
-  if (inputManager.wasKeyPressed(SDLK_SPACE) ||
-      inputManager.wasButtonPressed(SDL_CONTROLLER_BUTTON_X))
-  {
-    for (size_t i = 0; i < this->mBullets.size(); ++i)
-    {
-      if (!this->mBullets[i].active())
-      {
-        this->mBullets[i].fire();
-        break;
-      }
-      break;
-    }
-  }
-
   if (inputManager.isKeyHeld(SDLK_SPACE) ||
       inputManager.isButtonHeld(SDL_CONTROLLER_BUTTON_X))
   {
     if (!this->mBullets.at(this->mBulletIndex).active())
       this->mBullets.at(this->mBulletIndex).fire();
 
-    if (this->mElapsedTime > 75)
+    if (this->mElapsedTime > 75.0f)
     {
       this->mBulletIndex = (this->mBulletIndex < this->mBullets.size() - 1)
                                ? this->mBulletIndex + 1
@@ -169,6 +155,7 @@ void Player::update(float delta)
   this->mRightThruster.update(delta);
 
   this->mPlayerDirection.normalize();
+
   if (this->mPlayerLeft)
   {
     if ((this->mPosition.x - Config::padding_v) > this->mHorizontalBounds.x)
@@ -225,6 +212,7 @@ void Player::update(float delta)
     }
   }
 
+  // std::cout << delta << std::endl;
   for (auto &bullet : this->mBullets)
     bullet.update(delta);
 }
@@ -238,14 +226,14 @@ void Player::render(SDL_Renderer *renderer)
   {
     SDL_SetRenderDrawColor(renderer, this->mColor.r, this->mColor.g,
                            this->mColor.b, this->mColor.a);
-    SDL_RenderDrawRect(renderer, &(this->mRenderRect));
+    SDL_RenderDrawRectF(renderer, &(this->mRenderRect));
     SDL_SetRenderDrawColor(renderer, 255, 68, 78, 255);
-    SDL_RenderDrawRect(renderer, &(this->mHitbox));
+    SDL_RenderDrawRectF(renderer, &(this->mHitbox));
   }
   else
   {
-    SDL_RenderCopy(renderer, this->mTexture.get(), nullptr,
-                   &(this->mRenderRect));
+    SDL_RenderCopyF(renderer, this->mTexture.get(), nullptr,
+                    &(this->mRenderRect));
   }
 
   this->mLeftThruster.render(renderer);
