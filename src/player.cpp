@@ -191,10 +191,6 @@ void Player::update(float delta)
           0, delta * this->mPlayerDirection.y * Config::playerVelocity});
       this->mLeftThruster.moveParticles(Vec2<float>{
           0, delta * this->mPlayerDirection.y * Config::playerVelocity});
-
-      this->mBullets.at(this->mBulletIndex)
-          .move(
-              Vec2<float>{0, delta * -1 * (HO::Config::playerVelocity - 0.3f)});
     }
   }
   if (this->mPlayerDown)
