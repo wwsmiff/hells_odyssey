@@ -30,6 +30,8 @@ Editor::Editor(Vec2<float> size) : mSize{size}
 
   tweaky::db::overwrite(std::move(map));
 
+  tweaky::db::load_or_create("../config.json");
+
   if constexpr (enable_debug_v)
   {
     this->mInstance = gvdi::Instance{{size.x, size.y}, "Editor"};

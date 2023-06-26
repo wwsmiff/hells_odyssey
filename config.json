@@ -1,0 +1,75 @@
+{
+  "Debug view": {
+    "label": "Debug view",
+    "data": {
+      "type": "Boolean",
+      "value": false
+    }
+  },
+  "Bullet height": {
+    "label": "Bullet height",
+    "data": {
+      "type": "float",
+      "value": 55.000000,
+      "range": {
+        "min": 20.000000,
+        "max": 100.000000
+      }
+    }
+  },
+  "Bullet velocity": {
+    "label": "Bullet velocity",
+    "data": {
+      "type": "float",
+      "value": 1.300000,
+      "range": {
+        "min": 0.000000,
+        "max": 15.000000
+      }
+    }
+  },
+  "Player hitbox": {
+    "label": "Player hitbox",
+    "data": {
+      "type": "float",
+      "value": 20.000000,
+      "range": {
+        "min": 10.000000,
+        "max": 512.000000
+      }
+    }
+  },
+  "Bullet width": {
+    "label": "Bullet width",
+    "data": {
+      "type": "float",
+      "value": 15.000000,
+      "range": {
+        "min": 10.000000,
+        "max": 100.000000
+      }
+    }
+  },
+  "Player velocity": {
+    "label": "Player velocity",
+    "data": {
+      "type": "float",
+      "value": 0.750000,
+      "range": {
+        "min": 0.000000,
+        "max": 10.000000
+      }
+    }
+  },
+  "Player size": {
+    "label": "Player size",
+    "data": {
+      "type": "float",
+      "value": 160.000000,
+      "range": {
+        "min": 32.000000,
+        "max": 512.000000
+      }
+    }
+  }
+}

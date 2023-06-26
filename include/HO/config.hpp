@@ -1,7 +1,7 @@
 #pragma once
 #include <tweaky/value.hpp>
 
-constexpr inline bool enable_debug_v{true};
+constexpr inline bool enable_debug_v{false};
 
 namespace HO
 {

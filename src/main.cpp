@@ -81,6 +81,8 @@ int main(int argc, char *argv[])
   auto fps{0};
   while (running)
   {
+    std::cout << HO::Config::playerBlocksize << std::endl;
+
     auto current{std::chrono::steady_clock::now()};
     auto delta{std::chrono::duration<float, std::milli>(current - start)};
 
