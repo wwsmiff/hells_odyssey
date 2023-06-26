@@ -54,7 +54,7 @@
     "label": "Player velocity",
     "data": {
       "type": "float",
-      "value": 0.750000,
+      "value": 0.777000,
       "range": {
         "min": 0.000000,
         "max": 10.000000
@@ -65,7 +65,7 @@
     "label": "Player size",
     "data": {
       "type": "float",
-      "value": 160.000000,
+      "value": 160.932007,
       "range": {
         "min": 32.000000,
         "max": 512.000000

@@ -29,7 +29,6 @@ Editor::Editor(Vec2<float> size) : mSize{size}
       {"Debug view", tweaky::BoolData{.value = false}}};
 
   tweaky::db::overwrite(std::move(map));
-
   tweaky::db::load_or_create("../config.json");
 
   if constexpr (enable_debug_v)

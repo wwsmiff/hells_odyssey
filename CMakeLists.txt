@@ -38,7 +38,7 @@ FetchContent_MakeAvailable(gvdi)
 FetchContent_Declare(
   tweaky
   GIT_REPOSITORY https://github.com/cpp-gamedev/tweaky
-  GIT_TAG 61ac7d8
+  GIT_TAG f113b03
 )
 FetchContent_MakeAvailable(tweaky)
 

@@ -210,7 +210,6 @@ void Player::update(float delta)
     }
   }
 
-  // std::cout << delta << std::endl;
   for (auto &bullet : this->mBullets)
     bullet.update(delta);
 }

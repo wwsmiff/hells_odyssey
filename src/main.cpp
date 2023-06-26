@@ -24,6 +24,8 @@ int main(int argc, char *argv[])
 
   // HO::Window mainWindow{"Hell's Odyssey", HO::Vec2<int32_t>{800, 1024},
   //                       SDL_WINDOW_SHOWN};
+  HO::Editor editor{HO::Vec2<float>{500, 600}};
+
   bool running{true};
 
   SDL_FRect gameBackground{0, 0, camera_width_v, 0};
@@ -69,8 +71,6 @@ int main(int argc, char *argv[])
 
   HO::InputManager windowInput{};
 
-  HO::Editor editor{HO::Vec2<float>{500, 600}};
-
   std::chrono::duration<float, std::milli> elapsedTime{};
 
   auto start{std::chrono::steady_clock::now()};
@@ -81,8 +81,6 @@ int main(int argc, char *argv[])
   auto fps{0};
   while (running)
   {
-    std::cout << HO::Config::playerBlocksize << std::endl;
-
     auto current{std::chrono::steady_clock::now()};
     auto delta{std::chrono::duration<float, std::milli>(current - start)};
 
@@ -108,42 +106,6 @@ int main(int argc, char *argv[])
     player.render(mainWindow.getRenderer());
 
     mainWindow.render();
-
-    // if constexpr (enable_debug_v)
-    // {
-    //   gvdi::Frame frame{instance};
-    //   ImGui::SetNextWindowPos({0, 0});
-    //   ImGui::SetNextWindowSize({500, 600});
-    //   ImGui::Begin("Tools", nullptr, ImGuiWindowFlags_NoTitleBar);
-    //   ImGui::Checkbox("Debug View", &HO::Config::debugView);
-
-    //   ImGui::SliderFloat("Player velocity", &HO::Config::playerVelocity,
-    //   0.0f,
-    //                      50.0f);
-
-    //   int32_t playerBlocksizeInt{
-    //       static_cast<int32_t>(HO::Config::playerBlocksize)};
-    //   ImGui::SliderInt("Block size", &playerBlocksizeInt, 0, 1024);
-    //   HO::Config::playerBlocksize =
-    //   static_cast<uint32_t>(playerBlocksizeInt);
-
-    //   int32_t
-    //   playerHitboxInt{static_cast<int32_t>(HO::Config::playerHitbox)};
-    //   ImGui::SliderInt("Hitbox size", &playerHitboxInt, 0, 1024);
-    //   HO::Config::playerHitbox = static_cast<uint32_t>(playerHitboxInt);
-
-    //   ImGui::SliderFloat("Bullet velocity", &HO::Config::bulletVelocity,
-    //   0.0f,
-    //                      5.0f);
-    //   ImGui::SliderFloat("Bullet width", &HO::Config::bulletHitboxWidth,
-    //   0.0f,
-    //                      50.0f);
-    //   ImGui::SliderFloat("Bullet height", &HO::Config::bulletHitboxHeight,
-    //   0.0f,
-    //                      100.0f);
-
-    //   ImGui::End();
-    // }
 
     editor.inspect();
 
