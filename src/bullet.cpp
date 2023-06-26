@@ -35,7 +35,7 @@ Bullet::Bullet(uint8_t type, const Vec2<float> &origin)
 
 void Bullet::update(float delta)
 {
-  std::cout << delta << std::endl;
+  // std::cout << delta << std::endl;
   if constexpr (enable_debug_v)
   {
     for (auto &hitbox : this->mHitboxes)
