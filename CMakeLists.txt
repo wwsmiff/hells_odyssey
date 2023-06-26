@@ -59,4 +59,5 @@ target_sources(${PROJECT_NAME} PRIVATE
  src/bullet.cpp
  src/random.cpp
  src/particles.cpp
+ src/editor.cpp
 )

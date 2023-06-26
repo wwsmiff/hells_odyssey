@@ -1,5 +1,6 @@
 #pragma once
 #include "config.hpp"
+#include "editor.hpp"
 #include "input_manager.hpp"
 #include "particles.hpp"
 #include "player.hpp"
