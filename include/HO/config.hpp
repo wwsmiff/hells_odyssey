@@ -1,25 +1,24 @@
 #pragma once
-#include <cstdint>
+#include <tweaky/value.hpp>
 
-constexpr inline bool enable_debug_v{false};
+constexpr inline bool enable_debug_v{true};
 
 namespace HO
 {
 namespace Config
 {
-using TweakableUInt = std::uint32_t;
-using TweakableInt = std::int32_t;
-using TweakableFlag = bool;
-using TweakableFloat = float;
+using TweakableInt = tweaky::Value<int32_t>;
+using TweakableFlag = tweaky::Value<bool>;
+using TweakableFloat = tweaky::Value<float>;
 
-inline constexpr TweakableFloat padding_v{16.0f};
-inline constexpr TweakableInt gameController_deadzone_v{8000};
-inline TweakableFloat playerBlocksize{160.0f};
-inline TweakableFloat playerHitbox{20.0f};
-inline TweakableFloat playerVelocity{0.75f};
-inline TweakableFloat bulletVelocity{1.3f};
-inline TweakableFloat bulletHitboxWidth{15.0f};
-inline TweakableFloat bulletHitboxHeight{55.0f};
-inline TweakableFlag debugView{false};
+inline constexpr float padding_v{16.0f};
+inline constexpr int32_t game_controller_deadzone_v{8000};
+inline TweakableFloat playerBlocksize{"Player size"};
+inline TweakableFloat playerHitbox{"Player hitbox"};
+inline TweakableFloat playerVelocity{"Player velocity"};
+inline TweakableFloat bulletVelocity{"Bullet velocity"};
+inline TweakableFloat bulletHitboxWidth{"Bullet width"};
+inline TweakableFloat bulletHitboxHeight{"Bullet height"};
+inline TweakableFlag debugView{"Debug view"};
 }; // namespace Config
 }; // namespace HO
